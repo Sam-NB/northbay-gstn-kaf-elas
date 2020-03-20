@@ -435,13 +435,6 @@ Parameters:
   Env:
     Type: String
     Description: The environment you're deploying to.
-  SubnetId:
-    Type: 'List<AWS::EC2::Subnet::Id>'
-    # Default: /inf/us-east-1/sb_private
-  # DomainName:
-  #   Type: String
-  #   Default: ${Env}-elasticsearch
-  #   Description: Name of Elastic Search Domain
   EBSIOPS:
     # Type: Number
     # Default: 100
