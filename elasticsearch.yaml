@@ -1,0 +1,203 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Parameters:
+  Env:
+    Type: String
+    Description: The environment you're deploying to.
+  SecurityGroupId:
+    Type: 'AWS::EC2::SecurityGroup::Id'
+    # Default: /inf/us-east-1/sg_shared
+  SubnetId:
+    Type: 'List<AWS::EC2::Subnet::Id>'
+    # Default: /inf/us-east-1/sb_private
+  # DomainName:
+  #   Type: String
+  #   Default: ${Env}-elasticsearch
+  #   Description: Name of Elastic Search Domain
+  EBSIOPS:
+    # Type: Number
+    # Default: 100
+    Description: IOPS for attached EBS
+    Type : 'String'
+    # Default: '/elasticsearch/${Env}/EBSIOPS'
+  EBSVolumeType:
+    Type : 'String'
+    # Default: '/elasticsearch/${Env}/EBS_VOLUME_TYPE'
+    # Type: String
+    # Default: gp2
+    # AllowedValues:
+    #   - gp2
+    #   - io1
+    #   - st1
+    #   - sc1
+  EBSVolumeSize:
+    # Type: Number
+    # Default: 10
+    Description: EBS Volume Size
+    Type : 'String'
+    # Default: '/elasticsearch/${Env}/EBS_VOLUME_SIZE'
+  InstanceCount:
+    # Type: Number
+    # Default: 1
+    Description: Number of instances in Elastic Search Cluster
+    Type : 'String'
+    # Default: '/elasticsearch/${Env}/INSTANCE_COUNT'
+  InstanceType:
+    # Type: String
+    # Default: r5.xlarge.elasticsearch
+    Description: Type of instances in Elastic Search Cluster
+    Type : 'String'
+    # Default: '/elasticsearch/${Env}/INSTANCE_TYPE'    
+    # AllowedValues:
+    #   - c5.large.elasticsearch
+    #   - c5.xlarge.elasticsearch
+    #   - c5.2xlarge.elasticsearch
+    #   - c5.4xlarge.elasticsearch
+    #   - c5.9xlarge.elasticsearch
+    #   - c5.18xlarge.elasticsearch
+    #   - i3..large.elasticsearch
+    #   - i3.xlarge.elasticsearch
+    #   - i3.2xlarge.elasticsearch
+    #   - i3.4xlarge.elasticsearch
+    #   - i3.9xlarge.elasticsearch
+    #   - i3.16xlarge.elasticsearch
+    #   - m5.large.elasticsearch
+    #   - m5.xlarge.elasticsearch
+    #   - m5.2xlarge.elasticsearch
+    #   - m5.4xlarge.elasticsearch
+    #   - m5.12xlarge.elasticsearch
+    #   - r5.large.elasticsearch
+    #   - r5.xlarge.elasticsearch
+    #   - r5.2xlarge.elasticsearch
+    #   - r5.4xlarge.elasticsearch
+    #   - r5.12xlarge.elasticsearch
+    #   - t2.small.elasticsearch
+    #   - t2.medium.elasticsearch
+    #   - c4.large.elasticsearch
+    #   - c4.xlarge.elasticsearch
+    #   - c4.2xlarge.elasticsearch
+    #   - c4.4xlarge.elasticsearch
+    #   - c4.8xlarge.elasticsearch
+    #   - i2.xlarge.elasticsearch
+    #   - i2.2xlarge.elasticsearch
+    #   - m4.large.elasticsearch
+    #   - m4.xlarge.elasticsearch
+    #   - m4.2xlarge.elasticsearch
+    #   - m4.4xlarge.elasticsearch
+    #   - m4.10xlarge.elasticsearch
+    #   - r4.large.elasticsearch
+    #   - r4.xlarge.elasticsearch
+    #   - r4.2xlarge.elasticsearch
+    #   - r4.4xlarge.elasticsearch
+    #   - r4.8xlarge.elasticsearch
+    #   - r4.16xlarge.elasticsearch
+    #   - m3.medium.elasticsearch
+    #   - m3.large.elasticsearch
+    #   - m3.xlarge.elasticsearch
+    #   - m3.2xlarge.elasticsearch
+    #   - 4xlarge.elasticsearch
+    #   - r3.large.elasticsearch
+    #   - r3.xlarge.elasticsearch
+    #   - r3.2xlarge.elasticsearch
+    #   - r3.4xlarge.elasticsearch
+    #   - r3.8xlarge.elasticsearch
+      
+  ElasticsearchVersion:
+    Type: String
+    Default: 7.4
+    Description: Elastic Search Version
+    AllowedValues:
+      - 7.4
+      - 7.1
+      - 6.8
+      - 6.7
+      - 6.5
+      - 6.4
+      - 6.3
+      - 6.2
+      - 6.0
+      - 5.6
+      - 5.5
+      - 5.3
+      - 5.1
+      - 2.3
+      - 1.5
+  # NameTagValue:
+  #   Type: String
+  #   Default: ${Env}-elasticsearch-cluster
+  #   Description: Name Tag Value
+
+Conditions: 
+  IOPSCondition: !Equals [ !Ref EBSVolumeType, io1 ]
+
+
+Resources:
+
+  # ElasticSearchServiceLinkedRole:
+  #   Type: AWS::IAM::ServiceLinkedRole
+  #   Properties: 
+  #     AWSServiceName: es.amazonaws.com
+  #     #CustomSuffix: String
+  #     Description: Service Linked Role for AWS Elastic Serch. Role for ES to access resources in VPC
+  
+  ElasticSearch:
+    Type: AWS::Elasticsearch::Domain
+    #DependsOn: ElasticSearchServiceLinkedRole
+    Properties: 
+      AccessPolicies:
+        Version: '2012-10-17'
+        Statement:
+
+          - Effect: Allow
+            Principal:
+              #AWS: !GetAtt CognitoRole.Arn
+              AWS: '*'
+            Action: es:*
+            Resource: !Sub 'arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${Env}-elasticsearch/*' #!Join ['',['arn:aws:es:',!Ref 'AWS::Region',':',!Ref 'AWS::AccountId',':domain/',!Sub '${Env}-elasticsearch',"/*"]]
+
+
+          # - Effect: Allow
+          #   Principal:
+          #     AWS: !Sub 'arn:aws:iam::${AWS::AccountId}:role/${Env}-elasticsearch-lambda-role'
+          #   Action: es:*
+          #   Resource: !Sub 'arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${Env}-elasticsearch/*' #!Join ['',['arn:aws:es:',!Ref 'AWS::Region',':',!Ref 'AWS::AccountId',':domain/',!Sub '${Env}-elasticsearch',"/*"]]
+
+      # AdvancedOptions: 
+      #   Key : Value
+      DomainName: !Sub '${Env}-elasticsearch'
+      EBSOptions: 
+        EBSEnabled: true
+        Iops: !If [IOPSCondition, !Ref EBSIOPS, !Ref "AWS::NoValue"]
+        VolumeSize: !Ref EBSVolumeSize
+        VolumeType: !Ref EBSVolumeType
+      ElasticsearchClusterConfig: 
+        #DedicatedMasterCount: 0
+        DedicatedMasterEnabled: false
+        #DedicatedMasterType: r5.large.elasticsearch
+        InstanceCount: !Ref InstanceCount  
+        InstanceType: !Ref InstanceType
+        ZoneAwarenessEnabled: false
+      ElasticsearchVersion: !Ref ElasticsearchVersion
+      # EncryptionAtRestOptions: 
+      #   EncryptionAtRestOptions
+      # NodeToNodeEncryptionOptions: 
+      #   NodeToNodeEncryptionOptions
+      # SnapshotOptions: 
+      #   SnapshotOptions
+      # Tags: 
+      #   - Key: Name
+      #     Value: !Ref NameTagValue
+      VPCOptions: 
+        SecurityGroupIds: 
+          - !Ref SecurityGroupId
+        SubnetIds:
+          - !Select [ "1", !Ref SubnetId ]
+          #- !Ref SubnetId
+
+
+  ElasticsearchEndpoint:
+    Type: "AWS::SSM::Parameter"
+    Properties:
+      Name: !Sub /${Env}/ELASTICSEARCH_ENDPOINT
+      Type: "String"
+      Value: !GetAtt ElasticSearch.DomainEndpoint
