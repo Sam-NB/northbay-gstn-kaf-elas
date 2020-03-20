@@ -127,6 +127,14 @@ Parameters:
   #   Default: ${Env}-elasticsearch-cluster
   #   Description: Name Tag Value
 
+
+  GroundstationMessageLogGroupName:
+    # Type: Number
+    Default: /dxe/{$Env}/groundstation/messages
+    Description: Groundstation Message Log Group Name for Streaming to ElasticSearch
+    Type : 'String'
+
+
 Conditions: 
   IOPSCondition: !Equals [ !Ref EBSVolumeType, io1 ]
 
@@ -193,6 +201,18 @@ Resources:
         SubnetIds:
           - !Select [ "1", !Ref SubnetId ]
           #- !Ref SubnetId
+
+  GroundstationMessageLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties: 
+      LogGroupName: !Ref GroundstationMessageLogGroupName
+
+  GroundstationMessageSubFilter:
+    Type: 'AWS::Logs::SubscriptionFilter'
+    Properties:
+      DestinationArn: arn:aws:lambda:us-east-2:571792806194:function:LogsToElasticsearch_dev1-elasticsearch
+      LogGroupName: !Ref GroundstationMessageLogGroupName
+      FilterPattern: "" #!Ref FilterPattern
 
 
   ElasticsearchEndpoint:

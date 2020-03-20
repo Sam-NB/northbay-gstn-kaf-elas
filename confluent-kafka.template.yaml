@@ -51,6 +51,18 @@ Metadata:
         Parameters:
           - QSS3BucketName
           - QSS3KeyPrefix
+      - Label:
+          default: ElasticSearch Instance Configuration
+        Parameters:
+          - Env
+          - EBSIOPS
+          - EBSVolumeType
+          - EBSVolumeSize
+          - InstanceCount
+          - InstanceType
+          - ElasticsearchVersion
+          - GroundstationMessageLogGroupName
+        
     ParameterLabels:
       AssignPublicIP:
         default: Allocate a public IP for each instance
@@ -106,6 +118,25 @@ Metadata:
         default: Spot Price (optional)
       ZookeeperNodeStorage:
         default: Persistent Storage
+      Env:
+        default: Env separation prefix
+      EBSIOPS:
+        default: iops for the elastisearch ebs disk
+      EBSVolumeType:
+        default: ebs volume type for elasticsearch
+      EBSVolumeSize:
+        default: ebs volume size for elasticsearch
+      InstanceCount:
+        default: elastic search instance count
+      InstanceType:
+        default: elasticsearch instance type
+      ElasticsearchVersion:
+        default: elastic search version
+      GroundstationMessageLogGroupName:
+        default: loggroup used to stream groundstation kafka messages to elasticsearch
+
+
+
 Parameters:
   AssignPublicIP:
     AllowedValues:
@@ -361,6 +392,132 @@ Parameters:
     MaxValue: '1000'
     MinValue: '0'
     Type: Number
+
+  Env:
+    Type: String
+    Description: The environment you're deploying to.
+  SubnetId:
+    Type: 'List<AWS::EC2::Subnet::Id>'
+    # Default: /inf/us-east-1/sb_private
+  # DomainName:
+  #   Type: String
+  #   Default: ${Env}-elasticsearch
+  #   Description: Name of Elastic Search Domain
+  EBSIOPS:
+    # Type: Number
+    # Default: 100
+    Description: IOPS for attached EBS
+    Type : 'String'
+    # Default: '/elasticsearch/${Env}/EBSIOPS'
+  EBSVolumeType:
+    Type : 'String'
+    # Default: '/elasticsearch/${Env}/EBS_VOLUME_TYPE'
+    # Type: String
+    # Default: gp2
+    # AllowedValues:
+    #   - gp2
+    #   - io1
+    #   - st1
+    #   - sc1
+  EBSVolumeSize:
+    # Type: Number
+    # Default: 10
+    Description: EBS Volume Size
+    Type : 'String'
+    # Default: '/elasticsearch/${Env}/EBS_VOLUME_SIZE'
+  InstanceCount:
+    # Type: Number
+    # Default: 1
+    Description: Number of instances in Elastic Search Cluster
+    Type : 'String'
+    # Default: '/elasticsearch/${Env}/INSTANCE_COUNT'
+  InstanceType:
+    # Type: String
+    # Default: r5.xlarge.elasticsearch
+    Description: Type of instances in Elastic Search Cluster
+    Type : 'String'
+    # Default: '/elasticsearch/${Env}/INSTANCE_TYPE'    
+    # AllowedValues:
+    #   - c5.large.elasticsearch
+    #   - c5.xlarge.elasticsearch
+    #   - c5.2xlarge.elasticsearch
+    #   - c5.4xlarge.elasticsearch
+    #   - c5.9xlarge.elasticsearch
+    #   - c5.18xlarge.elasticsearch
+    #   - i3..large.elasticsearch
+    #   - i3.xlarge.elasticsearch
+    #   - i3.2xlarge.elasticsearch
+    #   - i3.4xlarge.elasticsearch
+    #   - i3.9xlarge.elasticsearch
+    #   - i3.16xlarge.elasticsearch
+    #   - m5.large.elasticsearch
+    #   - m5.xlarge.elasticsearch
+    #   - m5.2xlarge.elasticsearch
+    #   - m5.4xlarge.elasticsearch
+    #   - m5.12xlarge.elasticsearch
+    #   - r5.large.elasticsearch
+    #   - r5.xlarge.elasticsearch
+    #   - r5.2xlarge.elasticsearch
+    #   - r5.4xlarge.elasticsearch
+    #   - r5.12xlarge.elasticsearch
+    #   - t2.small.elasticsearch
+    #   - t2.medium.elasticsearch
+    #   - c4.large.elasticsearch
+    #   - c4.xlarge.elasticsearch
+    #   - c4.2xlarge.elasticsearch
+    #   - c4.4xlarge.elasticsearch
+    #   - c4.8xlarge.elasticsearch
+    #   - i2.xlarge.elasticsearch
+    #   - i2.2xlarge.elasticsearch
+    #   - m4.large.elasticsearch
+    #   - m4.xlarge.elasticsearch
+    #   - m4.2xlarge.elasticsearch
+    #   - m4.4xlarge.elasticsearch
+    #   - m4.10xlarge.elasticsearch
+    #   - r4.large.elasticsearch
+    #   - r4.xlarge.elasticsearch
+    #   - r4.2xlarge.elasticsearch
+    #   - r4.4xlarge.elasticsearch
+    #   - r4.8xlarge.elasticsearch
+    #   - r4.16xlarge.elasticsearch
+    #   - m3.medium.elasticsearch
+    #   - m3.large.elasticsearch
+    #   - m3.xlarge.elasticsearch
+    #   - m3.2xlarge.elasticsearch
+    #   - 4xlarge.elasticsearch
+    #   - r3.large.elasticsearch
+    #   - r3.xlarge.elasticsearch
+    #   - r3.2xlarge.elasticsearch
+    #   - r3.4xlarge.elasticsearch
+    #   - r3.8xlarge.elasticsearch
+      
+  ElasticsearchVersion:
+    Type: String
+    Default: 7.4
+    Description: Elastic Search Version
+    AllowedValues:
+      - 7.4
+      - 7.1
+      - 6.8
+      - 6.7
+      - 6.5
+      - 6.4
+      - 6.3
+      - 6.2
+      - 6.0
+      - 5.6
+      - 5.5
+      - 5.3
+      - 5.1
+      - 2.3
+      - 1.5
+
+  GroundstationMessageLogGroupName:
+    # Type: Number
+    Default: /dxe/{$Env}/groundstation/messages
+    Description: Groundstation Message Log Group Name for Streaming to ElasticSearch
+    Type : 'String'
+
 Rules:
   SubnetsInVPC:
     Assertions:
@@ -482,7 +639,7 @@ Resources:
         SubnetID: !Join 
           - ','
           - !Ref SubnetID
-  WorkerStack:
+  ProducerWorkerStack:
     Type: 'AWS::CloudFormation::Stack'
     Condition: IndependentWorkers
     Properties:
@@ -500,7 +657,7 @@ Resources:
         InstanceRole: !Ref InstanceIAMRole
         KeyPairName: !Ref KeyPairName
         LinuxOSAMI: !Ref LinuxOSAMI
-        NodeDesignation: worker
+        NodeDesignation: producer-worker
         NodeInstanceType: !Ref WorkerNodeInstanceType
         NodeSecurityGroup: !Ref WorkerSecurityGroup
         NodeSpotPrice: !Ref WorkerNodeSpotPrice
@@ -512,6 +669,55 @@ Resources:
         SubnetID: !Join 
           - ','
           - !Ref SubnetID
+  ConsumerWorkerStack:
+    Type: 'AWS::CloudFormation::Stack'
+    Condition: IndependentWorkers
+    Properties:
+      TemplateURL: !Sub >-
+        https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/nodegroup.template
+      Parameters:
+        AssignPublicIP: !Ref AssignPublicIP
+        BootDiskSize: !Ref BootDiskSize
+        ClusterInfoHandle: !Ref ClusterInfoHandle
+        ClusterName: !Ref ClusterName
+        ConfluentEdition: !Ref ConfluentEdition
+        ConfluentVersion: !Ref ConfluentVersion
+        ConnectorURLs: !Ref ConnectorURLs
+        InstanceProfile: !Ref InstanceProfile
+        InstanceRole: !Ref InstanceIAMRole
+        KeyPairName: !Ref KeyPairName
+        LinuxOSAMI: !Ref LinuxOSAMI
+        NodeDesignation: consumer-worker
+        NodeInstanceType: !Ref WorkerNodeInstanceType
+        NodeSecurityGroup: !Ref WorkerSecurityGroup
+        NodeSpotPrice: !Ref WorkerNodeSpotPrice
+        NumNodes: !Ref NumWorkers
+        ParentStackName: !Ref 'AWS::StackName'
+        PersistentStorage: !Ref WorkerNodeStorage
+        QSS3BucketName: !Ref QSS3BucketName
+        QSS3KeyPrefix: !Ref QSS3KeyPrefix
+        SubnetID: !Join 
+          - ','
+          - !Ref SubnetID
+  ElasticSearchStack:
+    Type: 'AWS::CloudFormation::Stack'
+    Condition: IndependentWorkers
+    Properties:
+      TemplateURL: !Sub >-
+        https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/elasticsearch.yaml
+      Parameters:
+        EBSIOPS: !Ref EBSIOPS
+        EBSVolumeSize: !Ref EBSVolumeSize
+        EBSVolumeType: !Ref EBSVolumeType
+        ElasticsearchVersion: !Ref ElasticsearchVersion
+        Env: !Ref Env
+        InstanceCount: !Ref InstanceCount
+        InstanceType: !Ref InstanceType
+        SecurityGroupId: !Ref BrokerSecurityGroup
+        SubnetId: !Join 
+          - ','
+          - !Ref SubnetID
+
   BrokerSecurityGroup:
     Type: 'AWS::EC2::SecurityGroup'
     Properties:
