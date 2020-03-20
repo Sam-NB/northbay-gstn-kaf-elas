@@ -130,7 +130,7 @@ Parameters:
 
   GroundstationMessageLogGroupName:
     # Type: Number
-    Default: /dxc/{$Env}/groundstation/messages
+    # Default: /dxc/{$Env}/groundstation/messages
     Description: Groundstation Message Log Group Name for Streaming to ElasticSearch
     Type : 'String'
 
