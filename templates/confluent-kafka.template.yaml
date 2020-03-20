@@ -697,6 +697,7 @@ Resources:
           - ','
           - !Ref SubnetID
   ElasticSearchStack:
+    DependsOn: ConsumerWorkerStack
     Type: 'AWS::CloudFormation::Stack'
     Condition: IndependentWorkers
     Properties:
