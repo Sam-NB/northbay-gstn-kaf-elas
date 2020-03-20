@@ -581,7 +581,7 @@ Resources:
     Type: 'AWS::CloudFormation::Stack'
     Properties:
       TemplateURL: !Sub >-
-        https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/nodegroup.template
+        https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/nodegroup.template.yaml
       Parameters:
         AssignPublicIP: !Ref AssignPublicIP
         BootDiskSize: !Ref BootDiskSize
@@ -612,7 +612,7 @@ Resources:
     Condition: IndependentZookeepers
     Properties:
       TemplateURL: !Sub >-
-        https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/nodegroup.template
+        https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/nodegroup.template.yaml
       Parameters:
         AssignPublicIP: !Ref AssignPublicIP
         BootDiskSize: !Ref BootDiskSize
@@ -641,7 +641,7 @@ Resources:
     Condition: IndependentWorkers
     Properties:
       TemplateURL: !Sub >-
-        https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/nodegroup.template
+        https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/nodegroup.template.yaml
       Parameters:
         AssignPublicIP: !Ref AssignPublicIP
         BootDiskSize: !Ref BootDiskSize
@@ -671,7 +671,7 @@ Resources:
     Condition: IndependentWorkers
     Properties:
       TemplateURL: !Sub >-
-        https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/nodegroup.template
+        https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/nodegroup.template.yaml
       Parameters:
         AssignPublicIP: !Ref AssignPublicIP
         BootDiskSize: !Ref BootDiskSize

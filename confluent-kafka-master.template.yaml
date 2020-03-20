@@ -560,7 +560,7 @@ Resources:
     Type: 'AWS::CloudFormation::Stack'
     Properties:
       TemplateURL: !Sub >-
-        https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/aws-vpc.template
+        https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/aws-vpc.template.yaml
       Parameters:
         AvailabilityZones: !Join 
           - ','
@@ -587,7 +587,7 @@ Resources:
     Type: 'AWS::CloudFormation::Stack'
     Properties:
       TemplateURL: !Sub >-
-        https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/confluent-kafka.template
+        https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/confluent-kafka.template.yaml
       Parameters:
         AssignPublicIP: !Ref AssignPublicIP
         BootDiskSize: !Ref BootDiskSize
