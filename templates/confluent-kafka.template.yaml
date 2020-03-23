@@ -45,7 +45,8 @@ Metadata:
       - Label:
           default: Worker Instance Configuration
         Parameters:
-          - NumWorkers
+          - NumProducerWorkers
+          - NumConsumerWorkers
           - WorkerNodeInstanceType
           - WorkerNodeStorage
           - WorkerNodeSpotPrice
@@ -99,8 +100,10 @@ Metadata:
         default: Kafka Topic Partitions
       KafkaTopic:
         default: Kafka Topic
-      NumWorkers:
-        default: Worker count
+      NumProducerWorkers:
+        default: Producer Worker count
+      NumConsumerWorkers:
+        default: Consumer Worker count
       NumZookeepers:
         default: Zookeeper count
       QSS3BucketName:
@@ -273,7 +276,7 @@ Parameters:
       Kafka Topic Partitions
     Type: Number
   KafkaTopic:
-    Default: 'dxc'
+    Default: 'groundstation'
     Description: >-
       Kafka Topic
     Type: String
@@ -283,9 +286,15 @@ Parameters:
     MaxValue: '9'
     MinValue: '1'
     Type: Number
-  NumWorkers:
+  NumProducerWorkers:
     Default: '2'
-    Description: Number of Kafka Connect Workers
+    Description: Number of Kafka Connect Producer Workers
+    MaxValue: '9'
+    MinValue: '0'
+    Type: Number
+  NumConsumerWorkers:
+    Default: '2'
+    Description: Number of Kafka Connect Consumer Workers
     MaxValue: '9'
     MinValue: '0'
     Type: Number
@@ -550,10 +559,17 @@ Rules:
             - 'Fn::RefAll': 'AWS::EC2::VPC::Id'
         AssertDescription: All subnets must in the VPC
 Conditions:
-  IndependentWorkers: !Not 
+  IndependentProducerWorkers: !Not 
     - !Equals 
-      - !Ref NumWorkers
+      - !Ref NumProducerWorkers
       - '0'
+  IndependentConsumerWorkers: !Not 
+    - !Equals 
+      - !Ref NumConsumerWorkers
+      - '0'
+  IndependentWorkers: !And
+    - !Condition IndependentProducerWorkers
+    - !Condition IndependentConsumerWorkers
   IndependentZookeepers: !Not 
     - !Equals 
       - !Ref NumZookeepers
@@ -665,7 +681,7 @@ Resources:
           - !Ref SubnetID
   ProducerWorkerStack:
     Type: 'AWS::CloudFormation::Stack'
-    Condition: IndependentWorkers
+    Condition: IndependentProducerWorkers
     Properties:
       TemplateURL: !Sub >-
         https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/nodegroup.template.yaml
@@ -685,7 +701,7 @@ Resources:
         NodeInstanceType: !Ref WorkerNodeInstanceType
         NodeSecurityGroup: !Ref WorkerSecurityGroup
         NodeSpotPrice: !Ref WorkerNodeSpotPrice
-        NumNodes: !Ref NumWorkers
+        NumNodes: !Ref NumProducerWorkers
         ParentStackName: !Ref 'AWS::StackName'
         PersistentStorage: !Ref WorkerNodeStorage
         QSS3BucketName: !Ref QSS3BucketName
@@ -695,7 +711,7 @@ Resources:
           - !Ref SubnetID
   ConsumerWorkerStack:
     Type: 'AWS::CloudFormation::Stack'
-    Condition: IndependentWorkers
+    Condition: IndependentConsumerWorkers
     Properties:
       TemplateURL: !Sub >-
         https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/nodegroup.template.yaml
@@ -715,7 +731,7 @@ Resources:
         NodeInstanceType: !Ref WorkerNodeInstanceType
         NodeSecurityGroup: !Ref WorkerSecurityGroup
         NodeSpotPrice: !Ref WorkerNodeSpotPrice
-        NumNodes: !Ref NumWorkers
+        NumNodes: !Ref NumConsumerWorkers
         ParentStackName: !Ref 'AWS::StackName'
         PersistentStorage: !Ref WorkerNodeStorage
         QSS3BucketName: !Ref QSS3BucketName
