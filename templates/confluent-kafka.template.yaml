@@ -791,6 +791,25 @@ Resources:
       FromPort: '9092'
       ToPort: '9093'
       SourceSecurityGroupId: !Ref WorkerSecurityGroup
+  BrokerElasticSearchIngress:
+    Type: 'AWS::EC2::SecurityGroupIngress'
+    Properties:
+      GroupId: !Ref BrokerSecurityGroup
+      Description: "elastic search ingress from brokers"
+      IpProtocol: tcp
+      FromPort: '443'
+      ToPort: '443'
+      SourceSecurityGroupId: !Ref BrokerSecurityGroup
+  WorkerElasticSearchIngress:
+    Type: 'AWS::EC2::SecurityGroupIngress'
+    Condition: IndependentWorkers
+    Properties:
+      GroupId: !Ref BrokerSecurityGroup
+      Description: "elastic search ingress from workers"
+      IpProtocol: tcp
+      FromPort: '443'
+      ToPort: '443'
+      SourceSecurityGroupId: !Ref WorkerSecurityGroup
   ZookeeperSecurityGroup:
     Type: 'AWS::EC2::SecurityGroup'
     Condition: IndependentZookeepers
