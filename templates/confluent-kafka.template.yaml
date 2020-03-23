@@ -32,6 +32,9 @@ Metadata:
           - BrokerNodeStorage
           - BrokerNodeStorageType
           - BrokerNodeSpotPrice
+          - KafkaTopicReplicationFactor
+          - KafkaTopicPartitions
+          - KafkaTopic
       - Label:
           default: Zookeeper Instance Configuration
         Parameters:
@@ -90,6 +93,12 @@ Metadata:
         default: Linux Operating System AMI
       NumBrokers:
         default: Broker count
+      KafkaTopicReplicationFactor:
+        default: Kafka Topic Replication Factor
+      KafkaTopicPartitions:
+        default: Kafka Topic Partitions
+      KafkaTopic:
+        default: Kafka Topic
       NumWorkers:
         default: Worker count
       NumZookeepers:
@@ -252,6 +261,21 @@ Parameters:
     Description: >-
       Operating system AMI for cluster instances; you MUST authorize access to
       the proper AMI at https://aws.amazon.com/marketplace
+    Type: String
+  KafkaTopicReplicationFactor:
+    Default: 1
+    Description: >-
+      Kafka Topic Replication Factor
+    Type: Number
+  KafkaTopicPartitions:
+    Default: 1
+    Description: >-
+      Kafka Topic Partitions
+    Type: Number
+  KafkaTopic:
+    Default: 'dxc'
+    Description: >-
+      Kafka Topic
     Type: String
   NumBrokers:
     Default: '3'
@@ -595,6 +619,9 @@ Resources:
         KeyPairName: !Ref KeyPairName
         LinuxOSAMI: !Ref LinuxOSAMI
         NodeDesignation: broker
+        KafkaTopicReplicationFactor: !Ref KafkaTopicReplicationFactor
+        KafkaTopicPartitions: !Ref KafkaTopicPartitions
+        KafkaTopic: !Ref KafkaTopic
         NodeInstanceType: !Ref BrokerNodeInstanceType
         NodeSecurityGroup: !Ref BrokerSecurityGroup
         NodeSpotPrice: !Ref BrokerNodeSpotPrice
