@@ -728,6 +728,8 @@ Resources:
               BROKER_IP=`cat /tmp/brokers | cut -d' ' -f1`
             - |
               /opt/confluent-5.0.0/bin/kafka-topics --if-not-exists --create --zookeeper "$BROKER_IP":2181 --replication-factor "$KAFKATOPIC_REPLICATIONFACTOR" --partitions "$KAFKATOPIC_PARTITIONS" --topic "$KAFKA_TOPIC"
+            - |+
+
             - |
             - KAFKATOPIC_REPLICATIONFACTOR=
             - !Ref KafkaTopicReplicationFactor
@@ -737,6 +739,7 @@ Resources:
             - !Ref KafkaTopic
             - WORKER_TYPE=
             - !Ref NodeDesignation
+            - |+
 
             - |
               if [ "$WORKER_TYPE" = "consumer-worker" ] ; then 

@@ -578,7 +578,46 @@ Conditions:
     - '1'
     - '1'
 Resources:
+  IAMS3ManagedPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Action:
+              - 's3:GetObject'
+            Resource: !Sub 'arn:aws:s3:::${QSS3BucketName}/${QSS3KeyPrefix}*'
+            Effect: Allow
+      ManagedPolicyName: aws-quick-start-s3-policy
+  IAMDescribeAccessEC2andCFNPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Action:
+              - 'ec2:CreateTags'
+              - 'ec2:DescribeInstances'
+              - 'cloudformation:DescribeStackResources'
+              - 's3:Get*'
+              - 's3:List*'
+            Resource: *
+            Effect: Allow
+      ManagedPolicyName: DescribeAccessEC2andCFN
+  IAMCloudWatchPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Action:
+              - 'logs:CreateLogStream'
+              - 'logs:PutLogEvents'
+            Resource: *
+            Effect: Allow
+      ManagedPolicyName: Cloudwatch-Putlogevents
   InstanceIAMRole:
+    Type: 'AWS::IAM::Role'
     Properties:
       AssumeRolePolicyDocument:
         Statement:
@@ -590,32 +629,37 @@ Resources:
                 - ec2.amazonaws.com
         Version: 2012-10-17
       Path: /
-      Policies:
-        - PolicyDocument:
-            Version: 2012-10-17
-            Statement:
-              - Action:
-                  - 's3:GetObject'
-                Resource: !Sub 'arn:aws:s3:::${QSS3BucketName}/${QSS3KeyPrefix}*'
-                Effect: Allow
-          PolicyName: aws-quick-start-s3-policy
-        - PolicyDocument:
-            Statement:
-              - Action:
-                  - 'ec2:CreateTags'
-                  - 'ec2:DescribeInstances'
-                  - 'cloudformation:DescribeStackResources'
-                  - 's3:Get*'
-                  - 's3:List*'
-                Effect: Allow
-                Resource: '*'
-          PolicyName: DescribeAccessEC2andCFN
+      ManagedPolicyArns:
+        - !Ref IAMS3ManagedPolicy
+        - !Ref IAMDescribeAccessEC2andCFNPolicy
+  ConsumerInstanceIAMRole:
     Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action:
+              - 'sts:AssumeRole'
+            Effect: Allow
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+        Version: 2012-10-17
+      Path: /
+      ManagedPolicyArns:
+        - !Ref IAMS3ManagedPolicy
+        - !Ref IAMDescribeAccessEC2andCFNPolicy
+        - !Ref IAMCloudWatchPolicy
   InstanceProfile:
     Properties:
       Path: /
       Roles:
         - !Ref InstanceIAMRole
+    Type: 'AWS::IAM::InstanceProfile'
+  ConsumerInstanceProfile:
+    Properties:
+      Path: /
+      Roles:
+        - !Ref ConsumerInstanceIAMRole
     Type: 'AWS::IAM::InstanceProfile'
   BrokerStack:
     Type: 'AWS::CloudFormation::Stack'
@@ -723,8 +767,8 @@ Resources:
         ConfluentEdition: !Ref ConfluentEdition
         ConfluentVersion: !Ref ConfluentVersion
         ConnectorURLs: !Ref ConnectorURLs
-        InstanceProfile: !Ref InstanceProfile
-        InstanceRole: !Ref InstanceIAMRole
+        InstanceProfile: !Ref ConsumerInstanceProfile
+        InstanceRole: !Ref ConsumerInstanceIAMRole
         KeyPairName: !Ref KeyPairName
         LinuxOSAMI: !Ref LinuxOSAMI
         NodeDesignation: consumer-worker

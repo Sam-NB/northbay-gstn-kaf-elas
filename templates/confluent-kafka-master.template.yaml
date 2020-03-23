@@ -40,6 +40,9 @@ Metadata:
           - BrokerNodeStorage
           - BrokerNodeStorageType
           - BrokerNodeSpotPrice
+          - KafkaTopicReplicationFactor
+          - KafkaTopicPartitions
+          - KafkaTopic
       - Label:
           default: Zookeeper Instance Configuration
         Parameters:
@@ -50,7 +53,8 @@ Metadata:
       - Label:
           default: Worker Instance Configuration
         Parameters:
-          - NumWorkers
+          - NumProducerWorkers
+          - NumConsumerWorkers
           - WorkerNodeInstanceType
           - WorkerNodeStorage
           - WorkerNodeSpotPrice
@@ -81,6 +85,16 @@ Metadata:
         default: Instance Type
       BrokerNodeSpotPrice:
         default: Spot Price (optional)
+      KafkaTopicReplicationFactor:
+        default: Kafka Topic Replication Factor
+      KafkaTopicPartitions:
+        default: Kafka Topic Partitions
+      KafkaTopic:
+        default: Kafka Topic
+      NumProducerWorkers:
+        default: Producer Worker count
+      NumConsumerWorkers:
+        default: Consumer Worker count
       BrokerNodeStorage:
         default: Persistent Storage
       BrokerNodeStorageType:
@@ -99,8 +113,6 @@ Metadata:
         default: Linux Operating System AMI
       NumBrokers:
         default: Broker count
-      NumWorkers:
-        default: Worker count
       NumZookeepers:
         default: Zookeeper count
       PrivateSubnet1CIDR:
@@ -270,15 +282,36 @@ Parameters:
       Operating system AMI for cluster instances; you MUST authorize access to
       the proper AMI at https://aws.amazon.com/marketplace
     Type: String
+  KafkaTopicReplicationFactor:
+    Default: 1
+    Description: >-
+      Kafka Topic Replication Factor
+    Type: Number
+  KafkaTopicPartitions:
+    Default: 1
+    Description: >-
+      Kafka Topic Partitions
+    Type: Number
+  KafkaTopic:
+    Default: 'groundstation'
+    Description: >-
+      Kafka Topic
+    Type: String
   NumBrokers:
     Default: '3'
     Description: Number of Kafka Brokers
     MaxValue: '9'
     MinValue: '1'
     Type: Number
-  NumWorkers:
+  NumProducerWorkers:
     Default: '2'
-    Description: Number of Kafka Connect Workers
+    Description: Number of Kafka Connect Producer Workers
+    MaxValue: '9'
+    MinValue: '0'
+    Type: Number
+  NumConsumerWorkers:
+    Default: '2'
+    Description: Number of Kafka Connect Consumer Workers
     MaxValue: '9'
     MinValue: '0'
     Type: Number
@@ -601,7 +634,8 @@ Resources:
         KeyPairName: !Ref KeyPairName
         LinuxOSAMI: !Ref LinuxOSAMI
         NumBrokers: !Ref NumBrokers
-        NumWorkers: !Ref NumWorkers
+        NumProducerWorkers: !Ref NumProducerWorkers
+        NumConsumerWorkers: !Ref NumConsumerWorkers
         NumZookeepers: !Ref NumZookeepers
         QSS3BucketName: !Ref QSS3BucketName
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
@@ -642,5 +676,8 @@ Resources:
         InstanceType: !Ref InstanceType
         ElasticsearchVersion: !Ref ElasticsearchVersion
         GroundstationMessageLogGroupName: !Ref GroundstationMessageLogGroupName
+        KafkaTopicReplicationFactor: !Ref KafkaTopicReplicationFactor
+        KafkaTopicPartitions: !Ref KafkaTopicPartitions
+        KafkaTopic: !Ref KafkaTopic
 
 
