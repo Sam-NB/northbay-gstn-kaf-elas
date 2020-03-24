@@ -601,7 +601,7 @@ Resources:
               - 'cloudformation:DescribeStackResources'
               - 's3:Get*'
               - 's3:List*'
-            Resource: *
+            Resource: '*'
             Effect: Allow
       ManagedPolicyName: DescribeAccessEC2andCFN
   IAMCloudWatchPolicy:
@@ -613,7 +613,7 @@ Resources:
           - Action:
               - 'logs:CreateLogStream'
               - 'logs:PutLogEvents'
-            Resource: *
+            Resource: '*'
             Effect: Allow
       ManagedPolicyName: Cloudwatch-Putlogevents
   InstanceIAMRole:
