@@ -686,6 +686,7 @@ Resources:
         KeyPairName: !Ref KeyPairName
         LinuxOSAMI: !Ref LinuxOSAMI
         NodeDesignation: broker
+        NodeType: broker
         KafkaTopicReplicationFactor: !Ref KafkaTopicReplicationFactor
         KafkaTopicPartitions: !Ref KafkaTopicPartitions
         KafkaTopic: !Ref KafkaTopic
@@ -719,6 +720,7 @@ Resources:
         KeyPairName: !Ref KeyPairName
         LinuxOSAMI: !Ref LinuxOSAMI
         NodeDesignation: zookeeper
+        NodeType: zookeeper
         NodeInstanceType: !Ref ZookeeperNodeInstanceType
         NodeSecurityGroup: !Ref ZookeeperSecurityGroup
         NodeSpotPrice: !Ref ZookeeperNodeSpotPrice
@@ -748,7 +750,8 @@ Resources:
         InstanceRole: !Ref InstanceIAMRole
         KeyPairName: !Ref KeyPairName
         LinuxOSAMI: !Ref LinuxOSAMI
-        NodeDesignation: producer-worker
+        NodeDesignation: worker
+        NodeType: producer-worker
         NodeInstanceType: !Ref WorkerNodeInstanceType
         NodeSecurityGroup: !Ref WorkerSecurityGroup
         NodeSpotPrice: !Ref WorkerNodeSpotPrice
@@ -778,7 +781,8 @@ Resources:
         InstanceRole: !Ref ConsumerInstanceIAMRole
         KeyPairName: !Ref KeyPairName
         LinuxOSAMI: !Ref LinuxOSAMI
-        NodeDesignation: consumer-worker
+        NodeDesignation: worker
+        NodeType: consumer-worker
         LogGroupName: !Ref LogGroupName
         NodeInstanceType: !Ref WorkerNodeInstanceType
         NodeSecurityGroup: !Ref WorkerSecurityGroup

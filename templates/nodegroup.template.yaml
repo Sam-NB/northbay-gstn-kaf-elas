@@ -76,6 +76,10 @@ Parameters:
     Default: unspecified
     Description: Tag for deployed instances
     Type: String
+  NodeType:
+    Default: unspecified
+    Description: Tag for deployed instances to differentiate producer and consumer nodes
+    Type: String
   LogGroupName:
     Default: "/dxc/dev/groundstation/messages"
     Description: Log group name in Cloudwatch where the agent logs from consumer are stored
@@ -659,7 +663,7 @@ Resources:
             - '  instance_tag='
             - !Ref ClusterName
             - '-'
-            - !Ref NodeDesignation
+            - !Ref NodeType
             - |
               -${launch_index}
             - '  aws ec2 create-tags'
@@ -746,7 +750,7 @@ Resources:
             - |+
 
             - WORKER_TYPE=
-            - !Ref NodeDesignation
+            - !Ref NodeType
             - |+
 
             - LOG_GROUP_NAME=
