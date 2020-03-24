@@ -76,6 +76,10 @@ Parameters:
     Default: unspecified
     Description: Tag for deployed instances
     Type: String
+  LogGroupName:
+    Default: "/dxc/dev/groundstation/messages"
+    Description: Log group name in Cloudwatch where the agent logs from consumer are stored
+    Type: String 
   KafkaTopicReplicationFactor:
     Default: 1
     Description: Kafka Topic Replication Factor
@@ -745,6 +749,10 @@ Resources:
             - !Ref NodeDesignation
             - |+
 
+            - LOG_GROUP_NAME=
+            - !Ref LogGroupName
+            - |+
+
             - |
               /opt/confluent-5.0.0/bin/kafka-topics --if-not-exists --create --zookeeper "$BROKER_IP":2181 --replication-factor "$KAFKATOPIC_REPLICATIONFACTOR" --partitions "$KAFKATOPIC_PARTITIONS" --topic "$KAFKA_TOPIC"
             - |+
@@ -766,7 +774,7 @@ Resources:
                                         "collect_list": [
                                                 {
                                                         "file_path": "/var/log/groundstation.log",
-                                                        "log_group_name": "/dxc/dev/groundstation/messages",
+                                                        "log_group_name": "'$LOG_GROUP_NAME'",
                                                         "log_stream_name": "{instance_id}"
                                                 }
                                                         ]
