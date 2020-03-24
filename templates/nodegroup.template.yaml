@@ -726,19 +726,27 @@ Resources:
 
             - |
               BROKER_IP=`cat /tmp/brokers | cut -d' ' -f1`
-            - |
-              /opt/confluent-5.0.0/bin/kafka-topics --if-not-exists --create --zookeeper "$BROKER_IP":2181 --replication-factor "$KAFKATOPIC_REPLICATIONFACTOR" --partitions "$KAFKATOPIC_PARTITIONS" --topic "$KAFKA_TOPIC"
             - |+
 
             - |
             - KAFKATOPIC_REPLICATIONFACTOR=
             - !Ref KafkaTopicReplicationFactor
+            - |+
+
             - KAFKATOPIC_PARTITIONS=
             - !Ref KafkaTopicPartitions
+            - |+
+
             - KAFKA_TOPIC=
             - !Ref KafkaTopic
+            - |+
+
             - WORKER_TYPE=
             - !Ref NodeDesignation
+            - |+
+
+            - |
+              /opt/confluent-5.0.0/bin/kafka-topics --if-not-exists --create --zookeeper "$BROKER_IP":2181 --replication-factor "$KAFKATOPIC_REPLICATIONFACTOR" --partitions "$KAFKATOPIC_PARTITIONS" --topic "$KAFKA_TOPIC"
             - |+
 
             - |
