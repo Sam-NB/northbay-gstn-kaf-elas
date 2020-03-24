@@ -782,3 +782,32 @@ Resources:
               fi
             - |+
 
+            - |
+              if [ "$WORKER_TYPE" = "consumer-worker" ] ; then 
+            - |2
+                sudo yum update -y
+            - |2
+                sudo yum groupinstall "Development Tools" -y
+            - |2
+                sudo yum install git cmake -y
+            - |2
+                git clone https://github.com/EliasOenal/multimon-ng
+            - |2
+                cd multimon-ng/
+            - |2
+                mkdir build
+            - |2
+                cd build/
+            - |2
+                cmake ..
+            - |2
+                make
+            - |2
+                sudo make install
+            - |2
+                cd ~
+            - |2
+                nc -lk 7355 |  multimon-ng -a MORSE_CW -t raw - | /opt/confluent-5.0.0/bin/kafka-console-producer --broker-list $BROKER_IP:9092 --topic $KAFKA_TOPIC
+            - |
+              fi
+            - |+
