@@ -211,7 +211,7 @@ Resources:
     Type: "AWS::Lambda::Permission"
     Properties:
       Action: lambda:InvokeFunction
-      FunctionName: LogsToElasticsearch_dev1-elasticsearch
+      FunctionName: LogsToElasticsearch_dev-elasticsearch
       Principal: logs.amazonaws.com
       #SourceArn: !Sub 'arn:aws:s3:::${S3AutosysNotificationsBucket}'
 
