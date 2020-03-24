@@ -815,7 +815,7 @@ Resources:
             - |2
                 cd ~
             - |2
-                sudo nc -lk 7355 |  multimon-ng -a MORSE_CW -t raw - | sudo /opt/confluent-5.0.0/bin/kafka-console-producer --broker-list $BROKER_IP:9092 --topic $KAFKA_TOPIC &
+                while true; do nc -l 7355 | multimon-ng -a MORSE_CW -t raw - | /opt/confluent-5.0.0/bin/kafka-console-producer --broker-list $BROKER_IP:9092 --topic $KAFKA_TOPIC; done &
             - |
               fi
             - |+
