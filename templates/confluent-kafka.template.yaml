@@ -588,7 +588,7 @@ Resources:
               - 's3:GetObject'
             Resource: !Sub 'arn:aws:s3:::${QSS3BucketName}/${QSS3KeyPrefix}*'
             Effect: Allow
-      ManagedPolicyName: aws-quick-start-s3-policy
+      ManagedPolicyName: !Sub ${Env}-aws-quick-start-s3-policy
   IAMDescribeAccessEC2andCFNPolicy:
     Type: AWS::IAM::ManagedPolicy
     Properties:
@@ -603,7 +603,7 @@ Resources:
               - 's3:List*'
             Resource: '*'
             Effect: Allow
-      ManagedPolicyName: DescribeAccessEC2andCFN
+      ManagedPolicyName: !Sub ${Env}-DescribeAccessEC2andCFN
   IAMCloudWatchPolicy:
     Type: AWS::IAM::ManagedPolicy
     Properties:
@@ -615,7 +615,7 @@ Resources:
               - 'logs:PutLogEvents'
             Resource: '*'
             Effect: Allow
-      ManagedPolicyName: Cloudwatch-Putlogevents
+      ManagedPolicyName: !Sub ${Env}-Cloudwatch-Putlogevents
   InstanceIAMRole:
     Type: 'AWS::IAM::Role'
     Properties:
