@@ -58,6 +58,7 @@ Metadata:
           - WorkerNodeInstanceType
           - WorkerNodeStorage
           - WorkerNodeSpotPrice
+          - LogGroupName
       - Label:
           default: AWS Quick Start Configuration
         Parameters:
@@ -139,6 +140,8 @@ Metadata:
         default: Spot Price (optional)
       WorkerNodeStorage:
         default: Persistent Storage
+      LogGroupName:
+        default: Log group name in Cloudwatch where the agent logs from consumer are stored
       ZookeeperNodeInstanceType:
         default: Instance Type
       ZookeeperNodeSpotPrice:
@@ -434,6 +437,10 @@ Parameters:
     MaxValue: '1000'
     MinValue: '0'
     Type: Number
+  LogGroupName:
+    Default: "/dxc/dev/groundstation/messages"
+    Description: Log group name in Cloudwatch where the agent logs from consumer are stored
+    Type: String
   ZookeeperNodeInstanceType:
     AllowedValues:
       - m3.medium
@@ -679,5 +686,6 @@ Resources:
         KafkaTopicReplicationFactor: !Ref KafkaTopicReplicationFactor
         KafkaTopicPartitions: !Ref KafkaTopicPartitions
         KafkaTopic: !Ref KafkaTopic
+        LogGroupName: !Ref LogGroupName
 
 
