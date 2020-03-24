@@ -791,7 +791,7 @@ Resources:
             - |+
 
             - |
-              if [ "$WORKER_TYPE" = "consumer-worker" ] ; then 
+              if [ "$WORKER_TYPE" = "producer-worker" ] ; then 
             - |2
                 sudo yum update -y
             - |2
