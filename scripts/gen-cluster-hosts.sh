@@ -127,9 +127,9 @@ else
 	head -3 /tmp/brokers > /tmp/zookeepers
 fi
 
-grep -q -e "-WorkerNodes-" -e "-WorkerStack-" ${CP_HOSTS_FILE}
+grep -q -e "-WorkerNodes-" -e "-[a-zA-Z]*WorkerStack-" ${CP_HOSTS_FILE}
 if [ $? -eq 0 ] ; then
-	grep -e "-WorkerNodes-" -e "-WorkerStack-" ${CP_HOSTS_FILE} \
+	grep -e "-WorkerNodes-" -e "-[a-zA-Z]*WorkerStack-" ${CP_HOSTS_FILE} \
 		| awk '{print $1" WORKERNODE"NR-1" "$2" "$3" "$4}' > /tmp/workers
 else
 	cp /tmp/brokers /tmp/workers
