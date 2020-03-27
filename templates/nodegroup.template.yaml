@@ -98,6 +98,7 @@ Parameters:
     Type: String
   NodeInstanceType:
     AllowedValues:
+      - t3.micro
       - t2.medium
       - t2.large
       - m3.medium

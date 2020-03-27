@@ -400,6 +400,7 @@ Parameters:
     Type: String
   WorkerNodeInstanceType:
     AllowedValues:
+      - t3.micro
       - m3.large
       - m3.xlarge
       - m4.xlarge
