@@ -317,7 +317,8 @@ Resources:
           - !Select [ "1", !Ref SubnetId ]
       MemorySize: 128
       Environment:
-        ElasticDomainEndPoint: !GetAtt ElasticSearch.DomainEndpoint
+        Variables: 
+          ElasticDomainEndPoint: !GetAtt ElasticSearch.DomainEndpoint
       Code:
           S3Bucket: !Ref QSS3BucketName
           S3Key: !Sub ${QSS3KeyPrefix}lambda/index.js.zip
