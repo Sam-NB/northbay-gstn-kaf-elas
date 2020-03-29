@@ -127,14 +127,36 @@ Parameters:
   #   Default: ${Env}-elasticsearch-cluster
   #   Description: Name Tag Value
 
-
   GroundstationMessageLogGroupName:
     # Type: Number
     # Default: /dxc/{$Env}/groundstation/messages
     Description: Groundstation Message Log Group Name for Streaming to ElasticSearch
     Type : 'String'
 
-
+  QSS3BucketName:
+    AllowedPattern: '^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$'
+    ConstraintDescription: >-
+      Quick Start bucket name can include numbers, lowercase letters, uppercase
+      letters, and hyphens (-). It cannot start or end with a hyphen (-).
+    Default: aws-quickstart
+    Description: >-
+      S3 bucket name for the Quick Start assets. Quick Start bucket name can
+      include numbers, lowercase letters, uppercase letters, and hyphens (-). It
+      cannot start or end with a hyphen (-).
+    Type: String
+    
+  QSS3KeyPrefix:
+    AllowedPattern: '^[0-9a-zA-Z-/]*$'
+    ConstraintDescription: >-
+      Quick Start key prefix can include numbers, lowercase letters, uppercase
+      letters, hyphens (-), and forward slash (/).
+    Default: quickstart-confluent-kafka/
+    Description: >-
+      S3 key prefix for the Quick Start assets. Quick Start key prefix can
+      include numbers, lowercase letters, uppercase letters, hyphens (-), and
+      forward slash (/).
+    Type: String
+    
 Conditions: 
   IOPSCondition: !Equals [ !Ref EBSVolumeType, io1 ]
 
@@ -208,6 +230,7 @@ Resources:
       LogGroupName: !Ref GroundstationMessageLogGroupName
 
   PermissionElasticsearchLoggingLambda:
+    DependsOn: LambdaLogsToElasticsearch
     Type: "AWS::Lambda::Permission"
     Properties:
       Action: lambda:InvokeFunction
@@ -219,13 +242,12 @@ Resources:
     DependsOn: 
       - GroundstationMessageLogGroup
       - PermissionElasticsearchLoggingLambda
+      - LambdaLogsToElasticsearch
     Type: 'AWS::Logs::SubscriptionFilter'
     Properties:
       DestinationArn: !Sub arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:LogsToElasticsearch_${Env}-elasticsearch
       LogGroupName: !Ref GroundstationMessageLogGroupName
       FilterPattern: "" #!Ref FilterPattern
-
-
 
   ElasticsearchEndpoint:
     Type: "AWS::SSM::Parameter"
@@ -233,3 +255,69 @@ Resources:
       Name: !Sub /${Env}/ELASTICSEARCH_ENDPOINT
       Type: "String"
       Value: !GetAtt ElasticSearch.DomainEndpoint
+  
+  LambdaExecutionRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      RoleName: "LambdaElasticSearchExecutionRole"
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole'
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Path: /
+      Policies:
+        - PolicyName: lambda-to-es-via-vpc-policy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'es:*' 
+                Resource: '*'
+        - PolicyName: logs-and-ec2-permissions
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'ec2:CreateNetworkInterface'
+                  - 'ec2:DescribeNetworkInterfaces'
+                  - 'ec2:DeleteNetworkInterface'
+                  - 'logs:CreateLogGroup'
+                  - 'logs:CreateLogStream'
+                  - 'logs:PutLogEvents'
+                Resource: '*'
+
+  LambdaLogsToElasticsearch:
+    Type: 'AWS::Lambda::Function'
+    DependsOn: 
+      - LambdaExecutionRole
+      - ElasticSearch
+    Properties:
+      FunctionName: !Sub LogsToElasticsearch_${Env}-elasticsearch
+      Description: "CloudWatch Logs to Amazon ES streaming"
+      Handler: "index.handler"
+      Role:
+        'Fn::GetAtt':
+          - LambdaExecutionRole
+          - Arn
+      Runtime: "nodejs10.x"
+      Timeout: 60
+      VpcConfig:
+        SecurityGroupIds: 
+          - !Ref SecurityGroupId
+        SubnetIds: 
+          - !Select [ "1", !Ref SubnetId ]
+      MemorySize: 128
+      Environment:
+        ElasticDomainEndPoint: !GetAtt ElasticSearch.DomainEndpoint
+      Code:
+          S3Bucket: !Ref QSS3BucketName
+          S3Key: !Sub ${QSS3KeyPrefix}templates/lambda/index.js.zip

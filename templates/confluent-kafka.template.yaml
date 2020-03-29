@@ -813,6 +813,8 @@ Resources:
         InstanceType: !Ref InstanceType
         GroundstationMessageLogGroupName: !Ref GroundstationMessageLogGroupName
         SecurityGroupId: !Ref BrokerSecurityGroup
+        QSS3BucketName: !Ref QSS3BucketName
+        QSS3KeyPrefix: !Ref QSS3KeyPrefix
         SubnetId: !Join 
           - ','
           - !Ref SubnetID
