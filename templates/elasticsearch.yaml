@@ -320,4 +320,4 @@ Resources:
         ElasticDomainEndPoint: !GetAtt ElasticSearch.DomainEndpoint
       Code:
           S3Bucket: !Ref QSS3BucketName
-          S3Key: !Sub ${QSS3KeyPrefix}templates/lambda/index.js.zip
+          S3Key: !Sub ${QSS3KeyPrefix}lambda/index.js.zip
