@@ -317,76 +317,76 @@ Resources:
           files:
             /tmp/sbin/compute-heap-opts:
               source: !Sub >-
-                https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}scripts/compute-heap-opts
+                https://s3-${AWS::Region}.amazonaws.com/${QSS3BucketName}/${QSS3KeyPrefix}scripts/compute-heap-opts
               mode: '000755'
               owner: root
               group: root
               authentication: S3AccessCreds
             /tmp/sbin/cp-deploy.sh:
               source: !Sub >-
-                https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}scripts/cp-deploy.sh
+                https://s3-${AWS::Region}.amazonaws.com/${QSS3BucketName}/${QSS3KeyPrefix}scripts/cp-deploy.sh
               mode: '000755'
               owner: root
               group: root
             /tmp/sbin/cp-install.sh:
               source: !Sub >-
-                https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}scripts/cp-install.sh
+                https://s3-${AWS::Region}.amazonaws.com/${QSS3BucketName}/${QSS3KeyPrefix}scripts/cp-install.sh
               mode: '000755'
               owner: root
               group: root
               authentication: S3AccessCreds
             /tmp/sbin/cp-retrieve-connect-jars.sh:
               source: !Sub >-
-                https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}scripts/cp-retrieve-connect-jars.sh
+                https://s3-${AWS::Region}.amazonaws.com/${QSS3BucketName}/${QSS3KeyPrefix}scripts/cp-retrieve-connect-jars.sh
               mode: '000755'
               owner: root
               group: root
               authentication: S3AccessCreds
             /tmp/sbin/cp-retrieve-scripts.sh:
               source: !Sub >-
-                https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}scripts/cp-retrieve-scripts.sh
+                https://s3-${AWS::Region}.amazonaws.com/${QSS3BucketName}/${QSS3KeyPrefix}scripts/cp-retrieve-scripts.sh
               mode: '000755'
               owner: root
               group: root
               authentication: S3AccessCreds
             /tmp/sbin/gen-cluster-hosts.sh:
               source: !Sub >-
-                https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}scripts/gen-cluster-hosts.sh
+                https://s3-${AWS::Region}.amazonaws.com/${QSS3BucketName}/${QSS3KeyPrefix}scripts/gen-cluster-hosts.sh
               mode: '000755'
               owner: root
               group: root
               authentication: S3AccessCreds
             /tmp/sbin/prep-cp-instance.sh:
               source: !Sub >-
-                https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}scripts/prep-cp-instance.sh
+                https://s3-${AWS::Region}.amazonaws.com/${QSS3BucketName}/${QSS3KeyPrefix}scripts/prep-cp-instance.sh
               mode: '000755'
               owner: root
               group: root
               authentication: S3AccessCreds
             /tmp/sbin/prepare-disks.sh:
               source: !Sub >-
-                https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}scripts/prepare-disks.sh
+                https://s3-${AWS::Region}.amazonaws.com/${QSS3BucketName}/${QSS3KeyPrefix}scripts/prepare-disks.sh
               mode: '000755'
               owner: root
               group: root
               authentication: S3AccessCreds
             /tmp/sbin/post-cp-info.sh:
               source: !Sub >-
-                https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}scripts/post-cp-info.sh
+                https://s3-${AWS::Region}.amazonaws.com/${QSS3BucketName}/${QSS3KeyPrefix}scripts/post-cp-info.sh
               mode: '000755'
               owner: root
               group: root
               authentication: S3AccessCreds
             /tmp/sbin/wait-for-child-resource.sh:
               source: !Sub >-
-                https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}scripts/wait-for-child-resource.sh
+                https://s3-${AWS::Region}.amazonaws.com/${QSS3BucketName}/${QSS3KeyPrefix}scripts/wait-for-child-resource.sh
               mode: '000755'
               owner: root
               group: root
               authentication: S3AccessCreds
             /tmp/sbin/wait-for-resource.sh:
               source: !Sub >-
-                https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}scripts/wait-for-resource.sh
+                https://s3-${AWS::Region}.amazonaws.com/${QSS3BucketName}/${QSS3KeyPrefix}scripts/wait-for-resource.sh
               mode: '000755'
               owner: root
               group: root
