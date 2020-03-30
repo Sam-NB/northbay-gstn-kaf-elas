@@ -952,7 +952,7 @@ Resources:
         - IpProtocol: tcp
           FromPort: '22'
           ToPort: '22'
-          CidrIp: !Ref SSHAccessCIDR 
+          CidrIp: !Ref SSHAccessCIDR
   SchemaRegistryRemoteIngress:
     Type: 'AWS::EC2::SecurityGroupIngress'
     Properties:
