@@ -997,6 +997,18 @@ Resources:
       FromPort: '9021'
       ToPort: '9021'
       CidrIp: !Ref RemoteAccessCIDR
+  GroundStationRemoteIngress:
+    Type: 'AWS::EC2::SecurityGroupIngress'
+    Properties:
+      GroupId: !If 
+        - IndependentWorkers
+        - !Ref WorkerSecurityGroup
+        - !Ref BrokerSecurityGroup
+      IpProtocol: tcp
+      FromPort: '55888'
+      ToPort: '55888'
+      Description: "GroundStation ingress for producer"
+      CidrIp: !Ref RemoteAccessCIDR
   ClusterInfoHandle:
     Type: 'AWS::CloudFormation::WaitConditionHandle'
   ClusterInfoCondition:
