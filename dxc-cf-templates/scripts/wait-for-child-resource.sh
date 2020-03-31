@@ -22,7 +22,7 @@
 #
 #
 #
-# Simple script to wait for a Cloudformation resource identified as 
+# Simple script to wait for a Cloudformation resource identified as
 # part of a Cloudformation::Stack chain (using logical resource names).
 #
 #
@@ -60,21 +60,12 @@ elif [ -z "$ThisRegion" ] ; then
 	exit 1
 fi
 
-# We need the physical resource id for the ChildStack in order to track the 
-# leaf Resource, so we're use the following query to retrieve it.
-ChildStackId=$(aws cloudformation describe-stack-resources \
-	--output json \
-	--region $ThisRegion \
-	--stack-name $ParentStack \
-	--query "StackResources[?LogicalResourceId=='${ChildStack}']" \
-	| jq -r '.[0] | .PhysicalResourceId')
-
-# echo "ChildStackId=$ChildStackId"
-
-if [ -z "${ChildStackId}"  -o  "${ChildStackId}" = "null" ] ; then
-	echo "$ChildStack does not exist as a resource in $ParentStack"
-	exit 0
+read -ra ChildStackIdS <<< $(aws cloudformation describe-stack-resources --output json --region $ThisRegion --stack-name $ParentStack | grep -E $ChildStack | grep PhysicalResourceId | cut -d'"' -f4)
+if [ -z "${ChildStackIdS}"  -o  "${ChildStackIdS}" = "null" ] ; then
+        echo "$ChildStack does not exist as a resource in $ParentStack"
+        exit 0
 fi
+for ChildStackId in "${ChildStackIdS[@]}"; do # access each element of array
 
 # Wait for all nodes to come on-line within a group
 #
@@ -104,4 +95,14 @@ do
 done
 
 echo "$ChildStack/$TargetResource has status $resourceStatus"
+done
 
+if [ -z "$ParentStack" -o -z "${ChildStack}" ] ; then
+	echo "No AWS Cloudformation Stacks specified; aborting script"
+	exit 1
+elif [ -z "$TargetResource" ] ; then
+	echo "No Resource specified; aborting script"
+elif [ -z "$ThisRegion" ] ; then
+	echo "Failed to determine AWS region; aborthing script"
+	exit 1
+fi
