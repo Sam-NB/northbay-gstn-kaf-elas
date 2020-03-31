@@ -613,15 +613,15 @@ Resources:
             - '$AMI_SBIN/wait-for-child-resource.sh '
             - !Ref ParentStackName
             - |2
-               *ZookeeperStack Nodes
+               ZookeeperStack Nodes
             - '$AMI_SBIN/wait-for-child-resource.sh '
             - !Ref ParentStackName
             - |2
-               *BrokerStack Nodes
+               BrokerStack Nodes
             - '$AMI_SBIN/wait-for-child-resource.sh '
             - !Ref ParentStackName
             - |2
-               *WorkerStack Nodes
+               WorkerStack Nodes
             - |+
 
             - |
@@ -734,19 +734,19 @@ Resources:
             - |+
 
             - |
-              PORT_KAFKA_TOPIC="2181"
+              ZOOKER_PORT="2181"
             - |+
 
             - |
-              PORT_KAFKA_CONSOLE="9092"
+              KAFKA_BROKER_PORT="9092"
             - |+
 
             - |
-              BROKER_KAFKA_TOPIC=""
+              ZOOKEEPER_SERVERS=""
             - |+
 
             - |
-              BROKER_KAFKA_CONSOLE=""
+              KAFKA_BROKER_SERVERS=""
             - |+
 
               read -ra brokerips <<< $(cat /tmp/brokers | cut -d' ' -f1)
@@ -755,11 +755,21 @@ Resources:
             - |
               for brokerip in "${brokerips[@]}"; do
             - |2
-                BROKER_KAFKA_TOPIC="${brokerip}:${PORT_KAFKA_TOPIC} ${BROKER_KAFKA_TOPIC}"
-            - |2
-                BROKER_KAFKA_CONSOLE="${brokerip}:${PORT_KAFKA_CONSOLE} ${BROKER_KAFKA_CONSOLE}"
+                KAFKA_BROKER_SERVERS="${brokerip}:${KAFKA_BROKER_PORT} ${KAFKA_BROKER_SERVERS}"
             - |2
               done
+
+              read -ra zookerips <<< $(cat /tmp/zookeepers | cut -d' ' -f1)
+            - |+
+
+            - |
+              for zookeeperip in "${zookerips[@]}"; do
+            - |2
+                ZOOKEEPER_SERVERS="${zookeeperip}:${ZOOKER_PORT} ${ZOOKEEPER_SERVERS}"
+            - |2
+              done
+
+
             - |+
 
             - |
@@ -784,7 +794,7 @@ Resources:
             - |+
 
             - |
-              /opt/confluent-5.0.0/bin/kafka-topics --if-not-exists --create --zookeeper "$BROKER_KAFKA_TOPIC" --replication-factor "$KAFKATOPIC_REPLICATIONFACTOR" --partitions "$KAFKATOPIC_PARTITIONS" --topic "$KAFKA_TOPIC"
+              /opt/confluent-5.0.0/bin/kafka-topics --if-not-exists --create --zookeeper "$ZOOKEEPER_SERVERS" --replication-factor "$KAFKATOPIC_REPLICATIONFACTOR" --partitions "$KAFKATOPIC_PARTITIONS" --topic "$KAFKA_TOPIC"
             - |+
 
             - |
@@ -823,7 +833,7 @@ Resources:
                   compress
                   }" > /etc/logrotate.d/cloudwatch-agent
             - |2
-                /opt/confluent-5.0.0/bin/kafka-console-consumer --bootstrap-server "$BROKER_KAFKA_CONSOLE" --topic "$KAFKA_TOPIC" >> /var/log/groundstation.log
+                /opt/confluent-5.0.0/bin/kafka-console-consumer --bootstrap-server "$KAFKA_BROKER_SERVERS" --topic "$KAFKA_TOPIC" >> /var/log/groundstation.log
             - |
               fi
             - |+
@@ -853,7 +863,7 @@ Resources:
             - |2
                 cd ~
             - |2
-                while true; do sudo nc -l 7355 | multimon-ng -a MORSE_CW -t raw - | sudo /opt/confluent-5.0.0/bin/kafka-console-producer --broker-list $BROKER_KAFKA_CONSOLE --topic $KAFKA_TOPIC; done &
+                while true; do sudo nc -l 7355 | multimon-ng -a MORSE_CW -t raw - | sudo /opt/confluent-5.0.0/bin/kafka-console-producer --broker-list $KAFKA_BROKER_SERVERS --topic $KAFKA_TOPIC; done &
             - |
               fi
             - |+
