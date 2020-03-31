@@ -794,7 +794,7 @@ Resources:
             - |+
 
             - |
-              /opt/confluent-5.0.0/bin/kafka-topics --if-not-exists --create --zookeeper "$ZOOKEEPER_SERVERS" --replication-factor "$KAFKATOPIC_REPLICATIONFACTOR" --partitions "$KAFKATOPIC_PARTITIONS" --topic "$KAFKA_TOPIC"
+              /opt/confluent-5.0.0/bin/kafka-topics --if-not-exists --create --zookeeper $ZOOKEEPER_SERVERS --replication-factor "$KAFKATOPIC_REPLICATIONFACTOR" --partitions "$KAFKATOPIC_PARTITIONS" --topic "$KAFKA_TOPIC"
             - |+
 
             - |
