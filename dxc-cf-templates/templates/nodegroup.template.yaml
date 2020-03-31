@@ -621,7 +621,11 @@ Resources:
             - '$AMI_SBIN/wait-for-child-resource.sh '
             - !Ref ParentStackName
             - |2
-               WorkerStack Nodes
+               ProducerWorkerStack Nodes
+            - '$AMI_SBIN/wait-for-child-resource.sh '
+            - !Ref ParentStackName
+            - |2
+               ConsumerWorkerStack Nodes
             - |+
 
             - |
