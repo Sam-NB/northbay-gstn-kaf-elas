@@ -734,7 +734,32 @@ Resources:
             - |+
 
             - |
-              BROKER_IP=`cat /tmp/brokers | cut -d' ' -f1`
+              PORT_KAFKA_TOPIC="2181"
+            - |+
+
+            - |
+              PORT_KAFKA_CONSOLE="9092"
+            - |+
+
+            - |
+              BROKER_KAFKA_TOPIC=""
+            - |+
+
+            - |
+              BROKER_KAFKA_CONSOLE=""
+            - |+
+
+              read -ra brokerips <<< $(cat /tmp/brokers | cut -d' ' -f1)
+            - |+
+
+            - |
+              for brokerip in "${brokerips[@]}"; do
+            - |2
+                BROKER_KAFKA_TOPIC="${brokerip}:${PORT_KAFKA_TOPIC} ${BROKER_KAFKA_TOPIC}"
+            - |2
+                BROKER_KAFKA_CONSOLE="${brokerip}:${PORT_KAFKA_CONSOLE} ${BROKER_KAFKA_CONSOLE}"
+            - |2
+              done
             - |+
 
             - |
@@ -759,7 +784,7 @@ Resources:
             - |+
 
             - |
-              /opt/confluent-5.0.0/bin/kafka-topics --if-not-exists --create --zookeeper "$BROKER_IP":2181 --replication-factor "$KAFKATOPIC_REPLICATIONFACTOR" --partitions "$KAFKATOPIC_PARTITIONS" --topic "$KAFKA_TOPIC"
+              /opt/confluent-5.0.0/bin/kafka-topics --if-not-exists --create --zookeeper "$BROKER_KAFKA_TOPIC" --replication-factor "$KAFKATOPIC_REPLICATIONFACTOR" --partitions "$KAFKATOPIC_PARTITIONS" --topic "$KAFKA_TOPIC"
             - |+
 
             - |
@@ -798,7 +823,7 @@ Resources:
                   compress
                   }" > /etc/logrotate.d/cloudwatch-agent
             - |2
-                /opt/confluent-5.0.0/bin/kafka-console-consumer --bootstrap-server "$BROKER_IP":9092 --topic "$KAFKA_TOPIC" >> /var/log/groundstation.log
+                /opt/confluent-5.0.0/bin/kafka-console-consumer --bootstrap-server "$BROKER_KAFKA_CONSOLE" --topic "$KAFKA_TOPIC" >> /var/log/groundstation.log
             - |
               fi
             - |+
@@ -828,7 +853,7 @@ Resources:
             - |2
                 cd ~
             - |2
-                while true; do sudo nc -l 7355 | multimon-ng -a MORSE_CW -t raw - | sudo /opt/confluent-5.0.0/bin/kafka-console-producer --broker-list $BROKER_IP:9092 --topic $KAFKA_TOPIC; done &
+                while true; do sudo nc -l 7355 | multimon-ng -a MORSE_CW -t raw - | sudo /opt/confluent-5.0.0/bin/kafka-console-producer --broker-list $BROKER_KAFKA_CONSOLE --topic $KAFKA_TOPIC; done &
             - |
               fi
             - |+
