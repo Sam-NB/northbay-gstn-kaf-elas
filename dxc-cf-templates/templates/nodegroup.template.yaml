@@ -1,6 +1,9 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: CloudFormation sub-template for Auto-scaling group deployment
 Parameters:
+  Env:
+    Type: String
+    Description: The environment you're deploying to.
   AssignPublicIP:
     AllowedValues:
       - 'true'
@@ -81,7 +84,7 @@ Parameters:
     Description: Tag for deployed instances to differentiate producer and consumer nodes
     Type: String
   LogGroupName:
-    Default: "/dxc/dev/groundstation/messages"
+    Default: "/dev/groundstation/messages"
     Description: Log group name in Cloudwatch where the agent logs from consumer are stored
     Type: String 
   KafkaTopicReplicationFactor:
@@ -794,6 +797,16 @@ Resources:
             - |+
 
             - |
+            - Env=
+            - !Ref Env
+            - |+
+
+            - |
+            - region=
+            - !Ref 'AWS::Region'
+            - |+
+
+            - |
               /opt/confluent-5.0.0/bin/kafka-topics --if-not-exists --create --zookeeper $ZOOKEEPER_SERVERS --replication-factor "$KAFKATOPIC_REPLICATIONFACTOR" --partitions "$KAFKATOPIC_PARTITIONS" --topic "$KAFKA_TOPIC"
             - |+
 
@@ -864,6 +877,16 @@ Resources:
                 cd ~
             - |2
                 while true; do sudo nc -l 7355 | multimon-ng -a MORSE_CW -t raw - | sudo /opt/confluent-5.0.0/bin/kafka-console-producer --broker-list $KAFKA_BROKER_SERVERS --topic $KAFKA_TOPIC; done &
+            - |
+              fi
+            - |+
+
+            - |
+              if [ "$WORKER_TYPE" = "broker" ] ; then
+            - |2
+                aws ssm put-parameter --name "/${Env}/bootstrap_servers" --value "$KAFKA_BROKER_SERVERS" --type "String" --description "list of brokers" --overwrite --region "$region"
+            - |2
+                aws ssm put-parameter --name "/${Env}/topic" --value "$KAFKA_TOPIC" --type "String" --description "Kafka topic" --overwrite --region "$region"
             - |
               fi
             - |+

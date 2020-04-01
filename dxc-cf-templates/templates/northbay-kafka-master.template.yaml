@@ -71,10 +71,18 @@ Metadata:
           - EBSIOPS
           - EBSVolumeType
           - EBSVolumeSize
-          - InstanceCount
-          - InstanceType
+          - ElasticSearchInstanceCount
+          - ElasticSearchInstanceType
           - ElasticsearchVersion
           - GroundstationMessageLogGroupName
+      - Label:
+          default: AquaGroundStation and Ipopp Configuration
+        Parameters:
+          - GroundStationInstanceType
+          - AquaGroundStationCFTemplateVersion
+          - AquaGroundStationCreateReceiverInstance
+          - GroundStationSatelliteName
+          - IpoppPassword
     ParameterLabels:
       AssignPublicIP:
         default: Allocate a public IP for each instance
@@ -156,15 +164,24 @@ Metadata:
         default: ebs volume type for elasticsearch
       EBSVolumeSize:
         default: ebs volume size for elasticsearch
-      InstanceCount:
+      ElasticSearchInstanceCount:
         default: elastic search instance count
-      InstanceType:
+      ElasticSearchInstanceType:
         default: elasticsearch instance type
       ElasticsearchVersion:
         default: elastic search version
       GroundstationMessageLogGroupName:
         default: loggroup used to stream groundstation kafka messages to elasticsearch
-
+      GroundStationInstanceType:
+        default: aquagroundstation instance type
+      AquaGroundStationCFTemplateVersion:
+        default: aquagroundstation cf template version
+      AquaGroundStationCreateReceiverInstance:
+        default: toggle for creating the EC2 receiver instance
+      GroundStationSatelliteName:
+        default: used for data receiver task
+      IpoppPassword:
+        default: password for the ipopp user
 
 Parameters:
   AssignPublicIP:
@@ -439,7 +456,7 @@ Parameters:
     MinValue: '0'
     Type: Number
   LogGroupName:
-    Default: "/dxc/dev/groundstation/messages"
+    Default: "/dev/groundstation/messages"
     Description: Log group name in Cloudwatch where the agent logs from consumer are stored
     Type: String
   ZookeeperNodeInstanceType:
@@ -498,13 +515,13 @@ Parameters:
     Description: EBS Volume Size
     Type : 'String'
     # Default: '/elasticsearch/${Env}/EBS_VOLUME_SIZE'
-  InstanceCount:
+  ElasticSearchInstanceCount:
     # Type: Number
     # Default: 1
     Description: Number of instances in Elastic Search Cluster
     Type : 'String'
     # Default: '/elasticsearch/${Env}/INSTANCE_COUNT'
-  InstanceType:
+  ElasticSearchInstanceType:
     # Type: String
     # Default: r5.xlarge.elasticsearch
     Description: Type of instances in Elastic Search Cluster
@@ -563,7 +580,37 @@ Parameters:
     #   - r3.2xlarge.elasticsearch
     #   - r3.4xlarge.elasticsearch
     #   - r3.8xlarge.elasticsearch
-      
+  GroundStationInstanceType:
+    Description: Type of instance for aquagroundstation
+    Type : 'String'
+    Default: "m5.4xlarge"
+    AllowedValues:
+      - m5.4xlarge
+      - m5d.4xlarge
+      - c5.4xlarge
+      - c5d.4xlarge
+  AquaGroundStationCFTemplateVersion:
+    Default: 1
+    Description: cf template type for aquagroundstation
+    Type : 'String'
+  AquaGroundStationCreateReceiverInstance:
+    Description: toggle for creating the EC2 receiver instance
+    Type : 'String'
+    Default: True
+    AllowedValues:
+      - True
+      - False
+  GroundStationSatelliteName:
+    Description: Used for data receiver task
+    Type : 'String'
+    Default: "AQUA"
+    AllowedValues:
+      - AQUA
+  IpoppPassword:
+    Type: String
+    Description: Password for the ipopp user
+    Default: 'ComplexPassword123'
+    NoEcho: true
   ElasticsearchVersion:
     Type: String
     Default: 7.4
@@ -584,10 +631,9 @@ Parameters:
       - 5.1
       - 2.3
       - 1.5
-
   GroundstationMessageLogGroupName:
     # Type: Number
-    Default: /dxc/{$Env}/groundstation/messages
+    Default: /{$Env}/groundstation/messages
     Description: Groundstation Message Log Group Name for Streaming to ElasticSearch
     Type : 'String'
 
@@ -596,6 +642,17 @@ Conditions:
   PrivateSubnetCondition: !Equals 
     - !Ref AssignPublicIP
     - 'false'
+  IndependentProducerWorkers: !Not 
+    - !Equals 
+      - !Ref NumProducerWorkers
+      - '0'
+  IndependentConsumerWorkers: !Not 
+    - !Equals 
+      - !Ref NumConsumerWorkers
+      - '0'
+  IndependentWorkers: !And
+    - !Condition IndependentProducerWorkers
+    - !Condition IndependentConsumerWorkers
 Resources:
   VPCStack:
     Type: 'AWS::CloudFormation::Stack'
@@ -677,16 +734,74 @@ Resources:
         ZookeeperNodeSpotPrice: !Ref ZookeeperNodeSpotPrice
         ZookeeperNodeStorage: !Ref ZookeeperNodeStorage
         Env: !Ref Env
-        EBSIOPS: !Ref EBSIOPS
-        EBSVolumeType: !Ref EBSVolumeType
-        EBSVolumeSize: !Ref EBSVolumeSize
-        InstanceCount: !Ref InstanceCount
-        InstanceType: !Ref InstanceType
-        ElasticsearchVersion: !Ref ElasticsearchVersion
-        GroundstationMessageLogGroupName: !Ref GroundstationMessageLogGroupName
         KafkaTopicReplicationFactor: !Ref KafkaTopicReplicationFactor
         KafkaTopicPartitions: !Ref KafkaTopicPartitions
         KafkaTopic: !Ref KafkaTopic
         LogGroupName: !Ref LogGroupName
 
+  ElasticSearchStack:
+    DependsOn: ConfluentStack
+    Type: 'AWS::CloudFormation::Stack'
+    Condition: IndependentWorkers
+    Properties:
+      TemplateURL: !Sub >-
+        https://s3-${AWS::Region}.amazonaws.com/${QSS3BucketName}/${QSS3KeyPrefix}templates/elasticsearch.yaml
+      Parameters:
+        EBSIOPS: !Ref EBSIOPS
+        EBSVolumeSize: !Ref EBSVolumeSize
+        EBSVolumeType: !Ref EBSVolumeType
+        ElasticsearchVersion: !Ref ElasticsearchVersion
+        Env: !Ref Env
+        InstanceCount: !Ref ElasticSearchInstanceCount
+        InstanceType: !Ref ElasticSearchInstanceType
+        GroundstationMessageLogGroupName: !Ref GroundstationMessageLogGroupName
+        SecurityGroupId: !GetAtt 
+          - ConfluentStack
+          - Outputs.SecurityGroupId
+        QSS3BucketName: !Ref QSS3BucketName
+        QSS3KeyPrefix: !Ref QSS3KeyPrefix
+        SubnetId: !GetAtt 
+          - ConfluentStack
+          - Outputs.SubnetID
+        VPCId: !GetAtt 
+          - VPCStack
+          - Outputs.VPCID
 
+  AquaGroundStationStack:
+    Type: 'AWS::CloudFormation::Stack'
+    Properties:
+      TemplateURL: !Sub >-
+        https://s3-${AWS::Region}.amazonaws.com/${QSS3BucketName}/${QSS3KeyPrefix}templates/aqua-rt-stps.yaml
+      Parameters:
+        CFTemplateVersion: !Ref AquaGroundStationCFTemplateVersion
+        CreateReceiverInstance: !Ref AquaGroundStationCreateReceiverInstance
+        SSHCidrBlock: !Ref RemoteAccessCIDR
+        SSHKeyName: !Ref KeyPairName
+        S3Bucket: !Ref QSS3BucketName
+        SubnetId: !GetAtt 
+          - ConfluentStack
+          - Outputs.SubnetID
+        VPCId: !GetAtt 
+          - VPCStack
+          - Outputs.VPCID
+        InstanceType: !Ref GroundStationInstanceType
+        SatelliteName: !Ref GroundStationSatelliteName
+
+  IpoppGroundStationStack:
+    Type: 'AWS::CloudFormation::Stack'
+    Properties:
+      TemplateURL: !Sub >-
+        https://s3-${AWS::Region}.amazonaws.com/${QSS3BucketName}/${QSS3KeyPrefix}templates/ipopp-instance.yaml
+      Parameters:
+        SSHCidrBlock: !Ref RemoteAccessCIDR
+        SSHKeyName: !Ref KeyPairName
+        S3Bucket: !Ref QSS3BucketName
+        SubnetId: !GetAtt 
+          - ConfluentStack
+          - Outputs.SubnetID
+        VPCId: !GetAtt 
+          - VPCStack
+          - Outputs.VPCID
+        InstanceType: !Ref GroundStationInstanceType
+        SatelliteName: !Ref GroundStationSatelliteName
+        IpoppPassword: !Ref IpoppPassword
