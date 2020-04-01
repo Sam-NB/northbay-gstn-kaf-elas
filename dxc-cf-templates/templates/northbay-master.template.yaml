@@ -760,18 +760,34 @@ Resources:
           - Outputs.SecurityGroupId
         QSS3BucketName: !Ref QSS3BucketName
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
-        SubnetId: !GetAtt 
-          - ConfluentStack
-          - Outputs.SubnetID
+        SubnetId: !Join 
+          - ','
+          - - !If 
+              - PrivateSubnetCondition
+              - !GetAtt 
+                - VPCStack
+                - Outputs.PrivateSubnet1AID
+              - !GetAtt 
+                - VPCStack
+                - Outputs.PublicSubnet1ID
+            - !If 
+              - PrivateSubnetCondition
+              - !GetAtt 
+                - VPCStack
+                - Outputs.PrivateSubnet2AID
+              - !GetAtt 
+                - VPCStack
+                - Outputs.PublicSubnet2ID
         VPCId: !GetAtt 
           - VPCStack
           - Outputs.VPCID
 
   AquaGroundStationStack:
+    DependsOn: VPCStack
     Type: 'AWS::CloudFormation::Stack'
     Properties:
       TemplateURL: !Sub >-
-        https://s3-${AWS::Region}.amazonaws.com/${QSS3BucketName}/${QSS3KeyPrefix}templates/aqua-rt-stps.yaml
+        https://s3-${AWS::Region}.amazonaws.com/${QSS3BucketName}/${QSS3KeyPrefix}templates/aqua-rt-stps.yml
       Parameters:
         CFTemplateVersion: !Ref AquaGroundStationCFTemplateVersion
         CreateReceiverInstance: !Ref AquaGroundStationCreateReceiverInstance
@@ -779,27 +795,28 @@ Resources:
         SSHKeyName: !Ref KeyPairName
         S3Bucket: !Ref QSS3BucketName
         SubnetId: !GetAtt 
-          - ConfluentStack
-          - Outputs.SubnetID
-        VPCId: !GetAtt 
+          - VPCStack
+          - Outputs.PublicSubnet1ID
+        VpcId: !GetAtt 
           - VPCStack
           - Outputs.VPCID
         InstanceType: !Ref GroundStationInstanceType
         SatelliteName: !Ref GroundStationSatelliteName
 
   IpoppGroundStationStack:
+    DependsOn: VPCStack
     Type: 'AWS::CloudFormation::Stack'
     Properties:
       TemplateURL: !Sub >-
-        https://s3-${AWS::Region}.amazonaws.com/${QSS3BucketName}/${QSS3KeyPrefix}templates/ipopp-instance.yaml
+        https://s3-${AWS::Region}.amazonaws.com/${QSS3BucketName}/${QSS3KeyPrefix}templates/ipopp-instance.yml
       Parameters:
         SSHCidrBlock: !Ref RemoteAccessCIDR
         SSHKeyName: !Ref KeyPairName
         S3Bucket: !Ref QSS3BucketName
         SubnetId: !GetAtt 
-          - ConfluentStack
-          - Outputs.SubnetID
-        VPCId: !GetAtt 
+          - VPCStack
+          - Outputs.PublicSubnet1ID
+        VpcId: !GetAtt 
           - VPCStack
           - Outputs.VPCID
         InstanceType: !Ref GroundStationInstanceType
