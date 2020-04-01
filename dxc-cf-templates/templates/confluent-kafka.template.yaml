@@ -477,6 +477,17 @@ Resources:
             Resource: '*'
             Effect: Allow
       ManagedPolicyName: !Sub ${Env}-DescribeAccessEC2andCFN
+  IAMEC2SSMPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Action:
+              - 'ssm:Put*'
+            Resource: '*'
+            Effect: Allow
+      ManagedPolicyName: !Sub ${Env}-EC2SSMPolicy
   IAMCloudWatchPolicy:
     Type: AWS::IAM::ManagedPolicy
     Properties:
@@ -505,6 +516,7 @@ Resources:
       ManagedPolicyArns:
         - !Ref IAMS3ManagedPolicy
         - !Ref IAMDescribeAccessEC2andCFNPolicy
+        - !Ref IAMEC2SSMPolicy
   ConsumerInstanceIAMRole:
     Type: 'AWS::IAM::Role'
     Properties:
@@ -565,6 +577,7 @@ Resources:
         PersistentStorageType: !Ref BrokerNodeStorageType
         QSS3BucketName: !Ref QSS3BucketName
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
+        Env: !Ref Env
         SubnetID: !Join 
           - ','
           - !Ref SubnetID
@@ -595,6 +608,7 @@ Resources:
         PersistentStorage: !Ref ZookeeperNodeStorage
         QSS3BucketName: !Ref QSS3BucketName
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
+        Env: !Ref Env
         SubnetID: !Join 
           - ','
           - !Ref SubnetID
@@ -626,6 +640,7 @@ Resources:
         PersistentStorage: !Ref WorkerNodeStorage
         QSS3BucketName: !Ref QSS3BucketName
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
+        Env: !Ref Env
         SubnetID: !Join 
           - ','
           - !Ref SubnetID
@@ -658,6 +673,7 @@ Resources:
         PersistentStorage: !Ref WorkerNodeStorage
         QSS3BucketName: !Ref QSS3BucketName
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
+        Env: !Ref Env
         SubnetID: !Join 
           - ','
           - !Ref SubnetID
