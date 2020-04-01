@@ -1,9 +1,9 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: >-
   This template creates a new VPC infrastructure for a Confluent Platform
-  reference architecture. **WARNING** This template creates Amazon EC2 instance
-  and related resources. You will be billed for the AWS resources used if you
-  create a stack from this template.
+  reference architecture. **WARNING** This template creates Amazon EC2 instance,
+  ElasticSearch domain, Grounstation receivers and related resources. You 
+  will be billed for the AWS resources used if you create a stack from this template.
 Metadata:
   'AWS::CloudFormation::Interface':
     ParameterGroups:
