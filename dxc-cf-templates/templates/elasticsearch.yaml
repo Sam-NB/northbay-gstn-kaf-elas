@@ -131,7 +131,7 @@ Parameters:
 
   GroundstationMessageLogGroupName:
     # Type: Number
-    # Default: /dxc/{$Env}/groundstation/messages
+    # Default: /{$Env}/groundstation/messages
     Description: Groundstation Message Log Group Name for Streaming to ElasticSearch
     Type : 'String'
 
@@ -349,9 +349,9 @@ Resources:
       MemorySize: 128
       Environment:
         Variables: 
-          bootstrap_servers_ssm_key: !Sub /dxc/${Env}/bootstrap_servers
+          bootstrap_servers_ssm_key: !Sub /${Env}/bootstrap_servers
           ssm_region: !Ref AWS::Region
-          topic_ssm_key: !Sub /dxc/${Env}/topic
+          topic_ssm_key: !Sub /${Env}/topic
       Code:
           S3Bucket: !Ref QSS3BucketName
           S3Key: !Sub ${QSS3KeyPrefix}lambda/topic_notifier.zip
