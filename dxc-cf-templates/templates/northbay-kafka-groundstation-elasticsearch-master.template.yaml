@@ -173,13 +173,13 @@ Metadata:
       GroundstationMessageLogGroupName:
         default: loggroup used to stream groundstation kafka messages to elasticsearch
       GroundStationInstanceType:
-        default: aquagroundstation instance type
+        default: groundstation instance type
       AquaGroundStationCFTemplateVersion:
         default: aquagroundstation cf template version
       AquaGroundStationCreateReceiverInstance:
-        default: toggle for creating the EC2 receiver instance
+        default: aquagroundstation create receiver instance
       GroundStationSatelliteName:
-        default: used for data receiver task
+        default: groundstation satellite name
       IpoppPassword:
         default: password for the ipopp user
 
