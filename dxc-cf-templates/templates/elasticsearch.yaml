@@ -10,6 +10,8 @@ Parameters:
   SubnetId:
     Type: 'List<AWS::EC2::Subnet::Id>'
     # Default: /inf/us-east-1/sb_private
+  VPCId:
+    Type: 'String'
   # DomainName:
   #   Type: String
   #   Default: ${Env}-elasticsearch
@@ -293,6 +295,7 @@ Resources:
                   - 'logs:CreateLogGroup'
                   - 'logs:CreateLogStream'
                   - 'logs:PutLogEvents'
+                  - 'ssm:GetParameter'
                 Resource: '*'
 
   LambdaLogsToElasticsearch:
@@ -322,3 +325,96 @@ Resources:
       Code:
           S3Bucket: !Ref QSS3BucketName
           S3Key: !Sub ${QSS3KeyPrefix}lambda/index.js.zip
+
+  LambdaS3ListenerKafkaProducer:
+    Type: 'AWS::Lambda::Function'
+    DependsOn: 
+      - LambdaExecutionRole
+      - ElasticSearch
+    Properties:
+      FunctionName: !Sub S3ToKafkaTopic_${Env}
+      Description: "S3 to Amazon ES streaming"
+      Handler: topic_notifier_lambda.lambda_handler
+      Role:
+        'Fn::GetAtt':
+          - LambdaExecutionRole
+          - Arn
+      Runtime: python3.7
+      Timeout: 15
+      VpcConfig:
+        SecurityGroupIds: 
+          - !Ref SecurityGroupId
+        SubnetIds: 
+          - !Select [ "1", !Ref SubnetId ]
+      MemorySize: 128
+      Environment:
+        Variables: 
+          bootstrap_servers_ssm_key: !Sub /dxc/${Env}/bootstrap_servers
+          ssm_region: !Ref AWS::Region
+          topic_ssm_key: !Sub /dxc/${Env}/topic
+      Code:
+          S3Bucket: !Ref QSS3BucketName
+          S3Key: !Sub ${QSS3KeyPrefix}lambda/topic_notifier.zip
+
+      # Code:
+      #   ZipFile: |
+      #     from __future__ import print_function
+
+      #     import json
+      #     import boto3
+      #     from kafka import KafkaProducer
+      #     import urllib
+      #     import ssl
+      #     import logging
+      #     import io
+      #     import os
+
+      #     root = logging.getLogger()
+      #     if root.handlers:
+      #         for handler in root.handlers:
+      #             root.removeHandler(handler)
+      #     logging.basicConfig(format='%(asctime)s %(message)s',level=logging.DEBUG)
+
+      #     def lambda_handler(event, context):  
+      #         print('Loading function')
+
+      #         s3 = boto3.client('s3')
+      #         ssm_client = boto3.client('ssm', os.environ['ssm_region'])
+      #         BOOTSTRAP_SERVERS = ssm_client.get_parameter(Name=os.environ['bootstrap_servers_ssm_key'])['Parameter']['Value'].split(" ")
+      #         TOPIC = ssm_client.get_parameter(Name=os.environ['topic_ssm_key'])['Parameter']['Value']
+
+      #         producer = KafkaProducer(
+      #            bootstrap_servers=BOOTSTRAP_SERVERS,
+      #            value_serializer=lambda m: json.dumps(m).encode('ascii'),
+      #            retry_backoff_ms=500,
+      #            request_timeout_ms=20000,
+      #         )
+
+      #         print("Received event: " + json.dumps(event, indent=2))
+
+      #         # Get the object from the event and show its content type
+      #         bucket = event['Records'][0]['s3']['bucket']['name']
+      #         key = event['Records'][0]['s3']['object']['key'].encode('utf8')
+
+      #         try:
+      #             print("New object in bucket {}, with key {}".format(bucket, key))
+      #             future = producer.send(TOPIC,"New object in bucket {}, with key {}".format(bucket, key))
+      #             record_metadata = future.get(timeout=10)
+      #             print("sent event to Kafka! topic {} partition {} offset {}".format(record_metadata.topic, record_metadata.partition, record_metadata.offset))
+
+      #         except Exception as e:
+      #             print(e)
+      #             print('Error getting object {} from bucket {}. '.format(key, bucket))
+      #             raise e
+
+  SSMVPCEndpoint:
+    Type: 'AWS::EC2::VPCEndpoint'
+    Properties:
+      PrivateDnsEnabled: true
+      ServiceName: !Sub 'com.amazonaws.${AWS::Region}.ssm'
+      SecurityGroupIds: 
+        - !Ref SecurityGroupId
+      SubnetIds: 
+        - !Select [ "1", !Ref SubnetId ]   
+      VpcEndpointType: Interface
+      VpcId: !Ref VPCId

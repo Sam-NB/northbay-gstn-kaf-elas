@@ -818,6 +818,8 @@ Resources:
         SubnetId: !Join 
           - ','
           - !Ref SubnetID
+        VPCId: !Ref VPCID
+
 
   BrokerSecurityGroup:
     Type: 'AWS::EC2::SecurityGroup'
