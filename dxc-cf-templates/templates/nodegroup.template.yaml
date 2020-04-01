@@ -884,9 +884,9 @@ Resources:
             - |
               if [ "$WORKER_TYPE" = "broker" ] ; then
             - |2
-                aws ssm put-parameter --name "/${Env}/bootstrap_servers" --value "$KAFKA_BROKER_SERVERS" --type "String" --description "list of brokers" --region "$region"
+                aws ssm put-parameter --name "/${Env}/bootstrap_servers" --value "$KAFKA_BROKER_SERVERS" --type "String" --description "list of brokers" --overwrite --region "$region"
             - |2
-                aws ssm put-parameter --name "/${Env}/topic" --value "$KAFKA_TOPIC" --type "String" --description "Kafka topic" --region "$region"
+                aws ssm put-parameter --name "/${Env}/topic" --value "$KAFKA_TOPIC" --type "String" --description "Kafka topic" --overwrite --region "$region"
             - |
               fi
             - |+
