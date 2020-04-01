@@ -81,7 +81,7 @@ Parameters:
     Description: Tag for deployed instances to differentiate producer and consumer nodes
     Type: String
   LogGroupName:
-    Default: "/dxc/dev/groundstation/messages"
+    Default: "/dev/groundstation/messages"
     Description: Log group name in Cloudwatch where the agent logs from consumer are stored
     Type: String 
   KafkaTopicReplicationFactor:
