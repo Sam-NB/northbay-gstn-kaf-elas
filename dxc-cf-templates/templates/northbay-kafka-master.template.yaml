@@ -76,13 +76,13 @@ Metadata:
           - ElasticsearchVersion
           - GroundstationMessageLogGroupName
       - Label:
-          default: AquaGroundStation Configuration
+          default: AquaGroundStation and Ipopp Configuration
         Parameters:
-          - AquaGroundStationInstanceType
+          - GroundStationInstanceType
           - AquaGroundStationCFTemplateVersion
           - AquaGroundStationCreateReceiverInstance
-          - AquaGroundStationSSHCidrBlock
-          - AquaGroundStationSatelliteName
+          - GroundStationSatelliteName
+          - IpoppPassword
     ParameterLabels:
       AssignPublicIP:
         default: Allocate a public IP for each instance
@@ -172,16 +172,16 @@ Metadata:
         default: elastic search version
       GroundstationMessageLogGroupName:
         default: loggroup used to stream groundstation kafka messages to elasticsearch
-      AquaGroundStationInstanceType:
+      GroundStationInstanceType:
         default: aquagroundstation instance type
       AquaGroundStationCFTemplateVersion:
         default: aquagroundstation cf template version
       AquaGroundStationCreateReceiverInstance:
         default: toggle for creating the EC2 receiver instance
-      AquaGroundStationSSHCidrBlock:
-        default: the CIDR Block that the security group will allow ssh access to an instance
-      AquaGroundStationSatelliteName:
+      GroundStationSatelliteName:
         default: used for data receiver task
+      IpoppPassword:
+        default: password for the ipopp user
 
 Parameters:
   AssignPublicIP:
@@ -580,7 +580,7 @@ Parameters:
     #   - r3.2xlarge.elasticsearch
     #   - r3.4xlarge.elasticsearch
     #   - r3.8xlarge.elasticsearch
-  AquaGroundStationInstanceType:
+  GroundStationInstanceType:
     Description: Type of instance for aquagroundstation
     Type : 'String'
     Default: "m5.4xlarge"
@@ -600,18 +600,17 @@ Parameters:
     AllowedValues:
       - True
       - False
-  AquaGroundStationSSHCidrBlock:
-    Description: The CIDR Block that the security group will allow ssh access to an instance. The CIDR Block has the form x.x.x.x/x
-    Type : 'String'
-    AllowedPattern : '((\d{1,3})\.){3}\d{1,3}/\d{1,2}'
-    ConstraintDescription : must be a valid CIDR range of the form x.x.x.x/x, for example "10.0.0.0/16".
-  AquaGroundStationSatelliteName:
+  GroundStationSatelliteName:
     Description: Used for data receiver task
     Type : 'String'
     Default: "AQUA"
     AllowedValues:
       - AQUA
-
+  IpoppPassword:
+    Type: String
+    Description: Password for the ipopp user
+    Default: 'ComplexPassword123'
+    NoEcho: true
   ElasticsearchVersion:
     Type: String
     Default: 7.4
@@ -632,7 +631,6 @@ Parameters:
       - 5.1
       - 2.3
       - 1.5
-
   GroundstationMessageLogGroupName:
     # Type: Number
     Default: /{$Env}/groundstation/messages
@@ -777,7 +775,7 @@ Resources:
       Parameters:
         CFTemplateVersion: !Ref AquaGroundStationCFTemplateVersion
         CreateReceiverInstance: !Ref AquaGroundStationCreateReceiverInstance
-        SSHCidrBlock: !Ref AquaGroundStationSSHCidrBlock
+        SSHCidrBlock: !Ref RemoteAccessCIDR
         SSHKeyName: !Ref KeyPairName
         S3Bucket: !Ref QSS3BucketName
         SubnetId: !GetAtt 
@@ -786,5 +784,24 @@ Resources:
         VPCId: !GetAtt 
           - VPCStack
           - Outputs.VPCID
-        InstanceType: !Ref AquaGroundStationInstanceType
-        SatelliteName: !Ref AquaGroundStationSatelliteName
+        InstanceType: !Ref GroundStationInstanceType
+        SatelliteName: !Ref GroundStationSatelliteName
+
+  IpoppGroundStationStack:
+    Type: 'AWS::CloudFormation::Stack'
+    Properties:
+      TemplateURL: !Sub >-
+        https://s3-${AWS::Region}.amazonaws.com/${QSS3BucketName}/${QSS3KeyPrefix}templates/ipopp-instance.yaml
+      Parameters:
+        SSHCidrBlock: !Ref RemoteAccessCIDR
+        SSHKeyName: !Ref KeyPairName
+        S3Bucket: !Ref QSS3BucketName
+        SubnetId: !GetAtt 
+          - ConfluentStack
+          - Outputs.SubnetID
+        VPCId: !GetAtt 
+          - VPCStack
+          - Outputs.VPCID
+        InstanceType: !Ref GroundStationInstanceType
+        SatelliteName: !Ref GroundStationSatelliteName
+        IpoppPassword: !Ref IpoppPassword
