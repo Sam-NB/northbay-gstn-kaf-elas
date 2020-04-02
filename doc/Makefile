@@ -16,7 +16,7 @@ clean_doc:
 clean_html:
 	 rm -rf $(DOCNAME).html  
 html: clean_html
-	 pandoc -s -f markdown+hard_line_breaks -o $(DOCNAME).html README.md
+	 pandoc -s -f markdown+hard_line_breaks -c style.css -o $(DOCNAME).html README.md
 open_html: html
 	 $(OPENER) $(DOCNAME).html
 pdf: clean_doc html
