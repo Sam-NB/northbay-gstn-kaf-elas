@@ -264,6 +264,10 @@ amazon-cloudwatch-agent.toml
       metricPath = ["logs"]
 
 
+[<img src="./images/MYDcrefl_TrueColor.20090165802.png" alt="Actual Downlinked Photo" class="size-full wp-image-6192 aligncenter" width="1024" />](./images/MYDcrefl_TrueColor.20090165802.png)
+
+
+
 
 
 [AWS Government, Education, & Nonprofits Blog](https://aws.amazon.com/blogs/publicsector/)
