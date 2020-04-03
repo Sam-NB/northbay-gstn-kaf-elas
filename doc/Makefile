@@ -23,6 +23,11 @@ pdf: clean_doc html
 	 wkhtmltopdf $(DOCNAME).html $(DOCNAME).pdf
 open_pdf: pdf
 	 $(OPENER) $(DOCNAME).pdf
+web_deploy: html
+	export AWS_PROFILE=571792806194_AdministratorAccess
+	aws s3 cp nb.gstn.kafka.elas.html s3://northblog/
+	aws s3 cp images/ s3://northblog/images/ --recursive
+
 
 ### main functions ###
 zip:
