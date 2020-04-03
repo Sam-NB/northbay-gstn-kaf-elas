@@ -171,14 +171,14 @@ Bash
     wget https://upload.wikimedia.org/wikipedia/commons/0/04/Wikipedia-Morse.ogg
     ffmpeg -i Wikipedia-Morse.ogg -f s16le -acodec pcm_s16le Wikipedia-Morse.raw
     
-    # what the sound file sounds like
+    # what the raw file sounds like
     cat Wikipedia-Morse.raw | aplay -r 48k -f S16_LE -t raw -c 1
 
     # this is the decoding that happens on the producer node
     cat Wikipedia-Morse.raw | multimon-ng -a MORSE_CW -t raw -
 
     #test connectivity and simulate a transmission
-    producer=$(aws ec2 describe-instances --region us-east-2 --output text |dos2unix| sed ':a;N;$!ba;s/\n/ /g' | sed "s/\(RESERVATIONS\)/\n\1/g" | grep kafka-producer | awk '{print $43}')
+    producer=$(aws ec2 describe-instances --region us-east-2 --output text |dos2unix| sed ':a;N;$!ba;s/\n/ /g' | sed "s/\(RESERVATIONS\)/\n\1/g" | grep kafka-producer | awk '{print $43}' | tail -n 1)
     nc -vz $producer 7355 -u
     
     # transmit your udp message to the producer node. 
@@ -205,6 +205,14 @@ Here we have configured a basic high-availability setup using 2 zones us-east-2a
 
 We used a 3 stack approach. We have a broker cluster that hosts the Kafka broker topics and Zookeeper nodes, a consumer cluster
 
+Communication is managed over the groundstation topic. 
+
+[<img src="./images/ksql_topic.png" alt="Kafka Topic" class="size-full wp-image-6192 aligncenter" width="512" />](./images/ksql_topic.png)
+
+Producer nodes listen for messages on incoming udp port 7355, decode and send the message to the broker managed topic. Consumer worker nodes read those message off the topic and emit them via Cloudwatch Log Streaming to Elastic Search. 
+
+
+
   Cloudwatch Streaming to ElasticSearch and Kibana
 
 [<img src="./images/es_stream.png" alt="Northbay Solution overview" class="size-full wp-image-6192 aligncenter" width="512" />](./images/es_stream.png)
@@ -213,6 +221,15 @@ We used a 3 stack approach. We have a broker cluster that hosts the Kafka broker
 
 
 ###
+
+### Cost
+
+This template will incur costs but it its minimal configuration and assuming you stop the receiver and processer m5.4xlarge intances ($0.768 per Hour each) and only run them in 15 minute increments the minimal cluster size would be composed of 3 instances with the following spot prices $0.20 per hour for Kafka worker nodes, $0.10 per hour for the Broker node. Minimal Elastic Search cluster costs as well which at the time of this writing t2.micro.elasticsearch $0.018 per Hour. 
+
+[<img src="./images/price1.png" alt="minimal spot instances" class="size-full wp-image-6192 aligncenter" width="512" />](./images/price1.png)
+
+###
+
 
 ### Results
 
