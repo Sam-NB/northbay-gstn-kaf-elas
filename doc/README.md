@@ -153,7 +153,7 @@ Bash
     #add permissions and notifications on both the bucket and lambda function
     sed  "s/LAMBDA_FUNCTION/$lambda/g; s/REGION/$region/g; s/ACCOUNT_ID/$your_account/g" src/templates/event_sub.json  > sub.json
     aws lambda add-permission --function-name $lambda --statement-id lambda_invoker --action "lambda:InvokeFunction" --principal s3.amazonaws.com --source-arn "arn:aws:s3:::$your_bucket" --source-account $your_account --region $region
-    aws s3api put-bucket-notification-configuration --bucket $your_account --notification-configuration file://sub.json
+    aws s3api put-bucket-notification-configuration --bucket $your_bucket --notification-configuration file://sub.json
 
 6. Send sample radio data to the open port on one of the the kafka producer nodes or Schedule a contact in the Groundstation UI.  
 
@@ -215,7 +215,7 @@ Producer nodes listen for messages on incoming udp port 7355, decode and send th
 
   Cloudwatch Streaming to ElasticSearch and Kibana
 
-[<img src="./images/es_stream.png" alt="Northbay Solution overview" class="size-full wp-image-6192 aligncenter" width="512" />](./images/es_stream.png)
+[<img src="./images/es_stream.png" alt="ElasticSearch Streaming" class="size-full wp-image-6192 aligncenter" width="512" />](./images/es_stream.png)
 
 
 
