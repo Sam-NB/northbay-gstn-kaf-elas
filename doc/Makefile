@@ -26,9 +26,9 @@ open_pdf: pdf
 web_deploy: html
 	export AWS_PROFILE=571792806194_AdministratorAccess
 	aws s3 cp nb.gstn.kafka.elas.html s3://northblog/
+	aws s3 cp style.css s3://northblog/
 	aws s3 cp images/ s3://northblog/images/ --recursive
-
-
+	
 ### main functions ###
 zip:
 	 git archive master --format zip --output $(ZIPNAME).$(ts).zip

@@ -277,26 +277,33 @@ realize their goals using AWS services.
 
 [<img src="./images/pers_image.png" alt="Sam" class="size-full wp-image-6192 aligncenter" width="128" />](./images/pers_image.png)
 
+### Manoj Kukreja
+
+Manoj is a Cloud Data Architect with NorthBay Solutions (NBS)
+Professional Services. NorthBay works closely with customers to help rapidly
+realize their goals using AWS services.
+
+[<img src="./images/manoj.png" alt="Manoj" class="size-full wp-image-6192 aligncenter" width="128" />](./images/manoj.png)
+
+### Ritesh Kuchukulla
+
+Ritesh is a Cloud Solutions Engineer with NorthBay Solutions (NBS)
+Professional Services. NorthBay works closely with customers to help rapidly
+realize their goals using AWS services.
+
+[<img src="./images/ritesh.png" alt="Ritesh" class="size-full wp-image-6192 aligncenter" width="128" />](./images/ritesh.png)
+
+
 [<img src="./images/nb-logo-grey.png" alt="NB Logo" class="size-full wp-image-6192 aligncenter" width="300" />](./images/nb-logo-grey.png)
 
 ### Resources
 
-<a href="https://aws.amazon.com/government-education?sc_ichannel=ha&amp;sc_icampaign=acq_awsblogsb&amp;sc_icontent=publicsector-resources" class="lb-txt-none lb-txt">AWS in the Public Sector</a>
-<a href="https://aws.amazon.com/solutions/case-studies?sc_ichannel=ha&amp;sc_icampaign=acq_awsblogsb&amp;sc_icontent=publicsector-resources" class="lb-txt-none lb-txt">Case Studies</a>
-<a href="https://aws.amazon.com/government-education/fix-this/" class="lb-txt-none lb-txt">Fix This Podcast</a>
-<a href="https://aws.amazon.com/government-education/resources?sc_ichannel=ha&amp;sc_icampaign=acq_awsblogsb&amp;sc_icontent=publicsector-resources" class="lb-txt-none lb-txt">Additional Resources</a>
+<a href="https://northbaysolutions.com/resources/" class="lb-txt-none lb-txt">NBS Resources</a>
 
 ------------------------------------------------------------------------
 
 ### Follow
 
-<a href="https://twitter.com/aws_gov" class="lb-txt-none lb-txt"><em></em> AWS for Government</a>
-<a href="https://twitter.com/aws_edu" class="lb-txt-none lb-txt"><em></em> AWS Education</a>
-<a href="https://twitter.com/awsnonprofits" class="lb-txt-none lb-txt"><em></em> AWS Nonprofits</a>
-<a href="https://pages.awscloud.com/communication-preferences?sc_ichannel=ha&amp;sc_icampaign=acq_awsblogsb&amp;sc_icontent=publicsector-social" class="lb-txt-none lb-txt"><em></em> Email Updates</a>
-
-<a href="https://aws.amazon.com/blogs/publicsector/true-value-earth-observation-data/?nc1=b_nrp" class="lb-widget-body"></a>
-<span class="lb-article-title">The true value of Earth
-Observation…</span>
+<a href="https://twitter.com/northbays" class="lb-txt-none lb-txt"><em></em> NBS Twitter</a>
 
 **
