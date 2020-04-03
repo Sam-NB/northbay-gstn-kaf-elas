@@ -188,87 +188,28 @@ In order to save costs while waiting for your scheduled satellite contact you ca
 
 ###
 
-### Details of what happening in each step
+### Details of what happening in each piece
 
 
-AWS Ground Station
+  AWS Ground Station
 
-Before you start using AWS Ground Station you will need to complete the registration for your AWS Ground Station account. See the Satellites and Resources section in the AWS Ground Station console page for onboarding details.  
+For this piece we followed the extensive guide provide by aws and merged it into our cloudformation template with all scripts and required software included for ease of one-click deploy. <a href="https://aws.amazon.com/blogs/publicsector/earth-observation-using-aws-ground-station/">AWS Ground Station Blog</a>
 
-Once you have completed the onboarding steps you may proceed with the following steps:
 
-Apache Kafka - Confluent Platform on the AWS Cloud
-We used the Confluent Platform for streaming in a  large-scale distributed environment built on Apache Kafka. The Confluent Platform on AWS Quick Start is for users who are looking to evaluate and use the full range of Confluent Platform and Apache Kafka capabilities in the managed infrastructure environment of AWS. 
-This Quick Start deploys Confluent Platform using AWS CloudFormation templates. You can use the Quick Start to build a new virtual private cloud (VPC) for your Confluent Platform cluster, or deploy Confluent Platform into an existing VPC.
-We created a Kafka Cluster using the following configurations:
- 
-Broker Node Instance Type:        m4.large (1)
-Producer Node Instance Type:    m4.xlarge (1)
-Consumer Node Instance Type:    m4.xlarge (1)
-Confluent Edition:            Confluent Open Source
-Topic:                    groundstation
- 
+  AWS VPC quickstart
 
-groundstation-broker-0 - Kafka Broker stores messages for Kafka topic groundstation
-groundstation-producer-0 - Reads data from radio and sends messages to Kafka topic groundstation
-groundstation-consumer-0 - Reads messages from Kafka topic groundstation and spools to a local file groundstation.log
-Amazon Cloudwatch
-We used Amazon Cloudwatch to collect messages from Kafka because the service has inbuilt functionality to stream data that it receives to Amazon Elasticsearch Service in near real-time through a CloudWatch Logs subscription. 
+Here we have configured a basic high-availability setup using 2 zones us-east-2a and us-east2-b that the cluster instances would scale into if you raised the number of required nodes. In this demo we only used 1 node in each availability group but this can be scaled up. 
 
-To accomplish this we configured an Amazon Cloudwatch Agent on the Kafka consumer and set up a subscription on the Amazon Cloudwatch Log Group to send messages to Amazon Elasticsearch service using Lambda.
-Amazon Cloudwatch Agent Configuration
-An Amazon Cloudwatch Agent is configured on the Kafka Consumer (groundstation-consumer-0) which collects the messages in groundstation.log and transfers them to Amazon Cloudwatch.
 
-log-config.json
-{
- "version":"1",
- "log_configs":[{"log_group_name":"/dxc/dev/groundstation/messages"}],
- "Region":"us-east-2"
-}
+  Apache Kafka
 
-amazon-cloudwatch-agent.toml
-[agent]
-  collection_jitter = "0s"
-  debug = false
-  flush_interval = "1s"
-  flush_jitter = "0s"
-  hostname = ""
-  interval = "60s"
-  logfile = "/opt/aws/amazon-cloudwatch-agent/logs/amazon-cloudwatch-agent.log"
-  metric_batch_size = 1000
-  metric_buffer_limit = 10000
-  omit_hostname = false
-  precision = ""
-  quiet = false
-  round_interval = false
+We used a 3 stack approach. We have a broker cluster that hosts the Kafka broker topics and Zookeeper nodes, a consumer cluster
 
-[inputs]
+  Cloudwatch Streaming to ElasticSearch and Kibana
 
-  [[inputs.tail]]
-    data_format = "value"
-    data_type = "string"
-    file_state_folder = "/opt/aws/amazon-cloudwatch-agent/logs/state"
-    name_override = "raw_log_line"
+[<img src="./images/es_stream.png" alt="Northbay Solution overview" class="size-full wp-image-6192 aligncenter" width="512" />](./images/es_stream.png)
 
-    [[inputs.tail.file_config]]
-      file_path = "/var/log/groundstation.log"
-      from_beginning = true
-      log_group_name = "/dxc/dev/groundstation/messages"
-      log_stream_name = "i-02728618e6211bd5a"
-      pipe = false
-    [inputs.tail.tags]
-      metricPath = "logs"
 
-[outputs]
-
-  [[outputs.cloudwatchlogs]]
-    file_state_folder = "/opt/aws/amazon-cloudwatch-agent/logs/state"
-    force_flush_interval = "5s"
-    log_stream_name = "i-02728618e6211bd5a"
-    region = "us-east-2"
-    tagexclude = ["metricPath"]
-    [outputs.cloudwatchlogs.tagpass]
-      metricPath = ["logs"]
 
 
 ###

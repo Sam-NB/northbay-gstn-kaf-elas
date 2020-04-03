@@ -868,6 +868,18 @@ Resources:
       ToPort: '55888'
       Description: "GroundStation ingress for producer"
       CidrIp: !Ref RemoteAccessCIDR
+  CustomSdrRemoteIngress:
+    Type: 'AWS::EC2::SecurityGroupIngress'
+    Properties:
+      GroupId: !If 
+        - IndependentWorkers
+        - !Ref WorkerSecurityGroup
+        - !Ref BrokerSecurityGroup
+      IpProtocol: tcp
+      FromPort: '7355'
+      ToPort: '7355'
+      Description: "Custom Software Defined radio ingress for producer"
+      CidrIp: !Ref RemoteAccessCIDR
   ClusterInfoHandle:
     Type: 'AWS::CloudFormation::WaitConditionHandle'
   ClusterInfoCondition:
