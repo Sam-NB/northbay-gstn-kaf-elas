@@ -72,12 +72,13 @@ Bash
 
 
 3. Fire off the one-click cloudformation deploy. (us-east-2). (Costs will be incurred on your account but spot instances can be used see below)
+
 Bash
 
     # setup some required vars
     Env=demo
     region=us-east-2
-    my_ip=curl "http://myexternalip.com/raw"
+    my_ip=$(curl "http://myexternalip.com/raw")
     url=$(aws s3 presign s3://$your_bucket/src/templates/northbay-kafka-groundstation-elasticsearch-master.template.yaml)
     
     # create the aws resources via cf stack
@@ -129,8 +130,8 @@ Bash
     ParameterKey=RemoteAccessCIDR,ParameterValue=$my_ip/32 \
     ParameterKey=SSHAccessCIDR,ParameterValue=$my_ip/32 \
     ParameterKey=VPCCIDR,ParameterValue=10.0.0.0/16 \
-    ParameterKey=WorkerNodeInstanceType,ParameterValue=t3.micro \
-    ParameterKey=WorkerNodeSpotPrice,ParameterValue=0.02 \
+    ParameterKey=WorkerNodeInstanceType,ParameterValue=m4.xlarge \
+    ParameterKey=WorkerNodeSpotPrice,ParameterValue=0.10 \
     ParameterKey=WorkerNodeStorage,ParameterValue=0 \
     ParameterKey=ZookeeperNodeInstanceType,ParameterValue=m4.large \
     ParameterKey=ZookeeperNodeSpotPrice,ParameterValue=0.05 \
@@ -161,19 +162,27 @@ Bash
 
 7. Manual mode
 
+
+On our reference non groundstation SDR demodulator implementation, we have preconfigured multimon-ng a RTL-SDR compatible digital mode decoder that works on multiple protocols. For this example we are going to simulate receiving a udp stream of Morse code in Continuous Wave. You can point your sdr to that port or use the sample file from wikipedia as below. The producer node will decode messages on port 7355 and pipe those to our Kafka topic for ingestion and streaming to Elastic Search. 
+
 Bash
     
     #download a sample Morse CW radio transmission
-    wget https://upload.wikimedia.org/wikipedia/commons/9/9e/A_through_Z_in_Morse_code.ogg
-    ffmpeg -i A_through_Z_in_Morse_code.ogg -f s16le -acodec pcm_s16le A_through_Z_in_Morse_code.raw
+    wget https://upload.wikimedia.org/wikipedia/commons/0/04/Wikipedia-Morse.ogg
+    ffmpeg -i Wikipedia-Morse.ogg -f s16le -acodec pcm_s16le Wikipedia-Morse.raw
     
+    # what the sound file sounds like
+    cat Wikipedia-Morse.raw | aplay -r 48k -f S16_LE -t raw -c 1
+
+    # this is the decoding that happens on the producer node
+    cat Wikipedia-Morse.raw | multimon-ng -a MORSE_CW -t raw -
+
     #test connectivity and simulate a transmission
     producer=$(aws ec2 describe-instances --region us-east-2 --output text |dos2unix| sed ':a;N;$!ba;s/\n/ /g' | sed "s/\(RESERVATIONS\)/\n\1/g" | grep kafka-producer | awk '{print $43}')
     nc -vz $producer 7355 -u
-
-    cat A_through_Z_in_Morse_code.raw | multimon-ng -a MORSE_CW -t raw -
-    cat A_through_Z_in_Morse_code.raw | aplay -r 48k -f S16_LE -t raw -c 1
-    cat A_through_Z_in_Morse_code.raw | nc $producer 7355 -u
+    
+    # transmit your udp message to the producer node. 
+    cat Wikipedia-Morse.raw | nc $producer 7355 -u
 
 In order to save costs while waiting for your scheduled satellite contact you can safely stop the receiver and processor instances and simply start them up 15 minutes before your receive window. After processing they can be safely stopped until you need them again next time. 
 
@@ -337,7 +346,7 @@ realize their goals using AWS services.
 
 <a href="https://northbaysolutions.com/resources/" class="lb-txt-none lb-txt">NBS Resources</a>
 
-<a href="https://aws.amazon.com/blogs/publicsector/earth-observation-using-aws-ground-station/">AWS Blog</a>
+<a href="https://aws.amazon.com/blogs/publicsector/earth-observation-using-aws-ground-station/">AWS Ground Station Blog</a>
 
 <a href="https://aws.amazon.com/quickstart/architecture/confluent-platform/" class="lb-txt-none lb-txt">Confluent Kafka Quickstart</a>
 
