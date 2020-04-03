@@ -863,7 +863,7 @@ Resources:
         - IndependentWorkers
         - !Ref WorkerSecurityGroup
         - !Ref BrokerSecurityGroup
-      IpProtocol: tcp
+      IpProtocol: udp
       FromPort: '55888'
       ToPort: '55888'
       Description: "GroundStation ingress for producer"

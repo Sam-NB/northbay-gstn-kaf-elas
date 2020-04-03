@@ -163,7 +163,7 @@ Bash
 7. Manual mode
 
 
-On our reference non groundstation SDR demodulator implementation, we have preconfigured multimon-ng a RTL-SDR compatible digital mode decoder that works on multiple protocols. For this example we are going to simulate receiving a udp stream of Morse code in Continuous Wave. You can point your sdr to that port or use the sample file from wikipedia as below. The producer node will decode messages on port 7355 and pipe those to our Kafka topic for ingestion and streaming to Elastic Search. 
+On our reference non groundstation SDR demodulator implementation, we have preconfigured multimon-ng a RTL-SDR compatible digital mode decoder that works on multiple protocols. For this example we are going to simulate receiving a tcp stream of Morse code in Continuous Wave. You can point your sdr to that port or use the sample file from wikipedia as below. The producer node will decode messages on received on tcp port 7355 and pipe those to our Kafka topic for ingestion and streaming to Elastic Search. 
 
 Bash
     
@@ -179,16 +179,97 @@ Bash
 
     #test connectivity and simulate a transmission
     producer=$(aws ec2 describe-instances --region us-east-2 --output text |dos2unix| sed ':a;N;$!ba;s/\n/ /g' | sed "s/\(RESERVATIONS\)/\n\1/g" | grep kafka-producer | awk '{print $43}' | tail -n 1)
-    nc -vz $producer 7355 -u
+    nc -vz $producer 7355
     
-    # transmit your udp message to the producer node. 
-    cat Wikipedia-Morse.raw | nc $producer 7355 -u
+    # transmit your tcp message to the producer node. 
+    cat Wikipedia-Morse.raw | nc $producer 7355
 
 In order to save costs while waiting for your scheduled satellite contact you can safely stop the receiver and processor instances and simply start them up 15 minutes before your receive window. After processing they can be safely stopped until you need them again next time. 
 
 ###
 
 ### Details of what happening in each piece
+
+
+   The majority of the Kafka Stack configuration is done via the nodegroup.template.yaml userdata with custom bootstrap operations based node type BROKER, CONSUMER or PRODUCER.
+
+Bash
+
+    ZOOKER_PORT="2181"
+    KAFKA_BROKER_PORT="9092"
+    ZOOKEEPER_SERVERS=""
+    KAFKA_BROKER_SERVERS=""
+    read -ra brokerips <<< $(cat /tmp/brokers | cut -d' ' -f1)
+
+    for brokerip in "${brokerips[@]}"; do
+      KAFKA_BROKER_SERVERS="${brokerip}:${KAFKA_BROKER_PORT} ${KAFKA_BROKER_SERVERS}"
+    done
+
+    read -ra zookerips <<< $(cat /tmp/zookeepers | cut -d' ' -f1)
+    for zookeeperip in "${zookerips[@]}"; do
+      ZOOKEEPER_SERVERS="${zookeeperip}:${ZOOKER_PORT} ${ZOOKEEPER_SERVERS}"
+    done
+
+    KAFKATOPIC_REPLICATIONFACTOR=1
+    KAFKATOPIC_PARTITIONS=1
+    KAFKA_TOPIC=groundstation
+    WORKER_TYPE=consumer-worker
+    LOG_GROUP_NAME=/demo/groundstation/messages
+    Env=demo
+    region=us-east-2
+    /opt/confluent-5.0.0/bin/kafka-topics --if-not-exists --create --zookeeper $ZOOKEEPER_SERVERS --replication-factor "$KAFKATOPIC_REPLICATIONFACTOR" --partitions "$KAFKATOPIC_PARTITIONS" --topic "$KAFKA_TOPIC"
+
+    if [ "$WORKER_TYPE" = "consumer-worker" ] ; then 
+      wget https://s3.amazonaws.com/amazoncloudwatch-agent/amazon_linux/amd64/latest/amazon-cloudwatch-agent.rpm
+      rpm -U ./amazon-cloudwatch-agent.rpm
+      echo '{
+      "agent": {
+              "run_as_user": "cwagent"
+                },
+      "logs": {
+              "logs_collected": {
+                      "files": {
+                              "collect_list": [
+                                      {
+                                              "file_path": "/var/log/groundstation.log",
+                                              "log_group_name": "'$LOG_GROUP_NAME'",
+                                              "log_stream_name": "{instance_id}"
+                                      }
+                                              ]
+                                }
+                                }
+              }
+    }' > /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
+      /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json -s
+      echo "/opt/aws/amazon-cloudwatch-agent/logs/amazon-cloudwatch-agent.log {
+        missingok
+        notifempty
+        rotate 10
+        daily
+        compress
+        }" > /etc/logrotate.d/cloudwatch-agent
+      /opt/confluent-5.0.0/bin/kafka-console-consumer --bootstrap-server "$KAFKA_BROKER_SERVERS" --topic "$KAFKA_TOPIC" >> /var/log/groundstation.log
+    fi
+
+    if [ "$WORKER_TYPE" = "producer-worker" ] ; then 
+      sudo yum update -y
+      sudo yum groupinstall "Development Tools" -y
+      sudo yum install git cmake -y
+      git clone https://github.com/EliasOenal/multimon-ng
+      cd multimon-ng/
+      mkdir build
+      cd build/
+      cmake ..
+      make
+      sudo make install
+      cd ~
+      while true; do sudo nc -l 7355 | multimon-ng -a MORSE_CW -t raw - | sudo /opt/confluent-5.0.0/bin/kafka-console-producer --broker-list $KAFKA_BROKER_SERVERS --topic $KAFKA_TOPIC; done &
+    fi
+
+    if [ "$WORKER_TYPE" = "broker" ] ; then
+      aws ssm put-parameter --name "/${Env}/bootstrap_servers" --value "$KAFKA_BROKER_SERVERS" --type "String" --description "list of brokers" --overwrite --region "$region"
+      aws ssm put-parameter --name "/${Env}/topic" --value "$KAFKA_TOPIC" --type "String" --description "Kafka topic" --overwrite --region "$region"
+    fi
 
 
   AWS Ground Station
@@ -209,13 +290,12 @@ Communication is managed over the groundstation topic.
 
 [<img src="./images/ksql_topic.png" alt="Kafka Topic" class="size-full wp-image-6192 aligncenter" width="512" />](./images/ksql_topic.png)
 
-Producer nodes listen for messages on incoming udp port 7355, decode and send the message to the broker managed topic. Consumer worker nodes read those message off the topic and emit them via Cloudwatch Log Streaming to Elastic Search. 
-
+Producer nodes listen for messages on incoming tcp port 7355, decode and send the message to the broker managed topic. Consumer worker nodes read those message off the topic and emit them via Cloudwatch Log Streaming to Elastic Search. 
 
 
   Cloudwatch Streaming to ElasticSearch and Kibana
 
-[<img src="./images/es_stream.png" alt="ElasticSearch Streaming" class="size-full wp-image-6192 aligncenter" width="512" />](./images/es_stream.png)
+In basic terms a cloudwatch agent was installed via userdata on the consumer-worker nodes to stream to a cloudformation configured loggroup and a Lambda function streams groups of messages to the ElasticSearch cluster. Reference can be found <a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CWL_ES_Stream.html">here.</a>
 
 
 
