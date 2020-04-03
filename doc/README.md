@@ -181,8 +181,6 @@ In order to save costs while waiting for your scheduled satellite contact you ca
 
 ### Details of what happening in each step
 
-###
-
 
 AWS Ground Station
 
@@ -264,10 +262,23 @@ amazon-cloudwatch-agent.toml
       metricPath = ["logs"]
 
 
+###
+
+### Results
+
+Nasa splits their outputs into Level products. Level 0 products are closer to raw unprocessed data. As you rise to Levels 1 and 2 you start to see more human readable image and text output for example:
+
 [<img src="./images/MYDcrefl_TrueColor.20090165802.png" alt="Actual Downlinked Photo" class="size-full wp-image-6192 aligncenter" width="512" />](./images/MYDcrefl_TrueColor.20090165802.png)
 
 
+The AQUA satellite can be tracked live on the following site:
 
+[<img src="./images/aqua_live.png" alt="Actual Downlinked Photo" class="size-full wp-image-6192 aligncenter" width="512" />](./images/aqua_live.png)
+
+
+
+
+###
 
 ### Sam Zahabi
 
@@ -277,6 +288,9 @@ realize their goals using AWS services.
 
 [<img src="./images/pers_image.png" alt="Sam" class="size-full wp-image-6192 aligncenter" width="128" />](./images/pers_image.png)
 
+
+###
+
 ### Manoj Kukreja
 
 Manoj is a Cloud Data Architect with NorthBay Solutions (NBS)
@@ -284,6 +298,9 @@ Professional Services. NorthBay works closely with customers to help rapidly
 realize their goals using AWS services.
 
 [<img src="./images/manoj.png" alt="Manoj" class="size-full wp-image-6192 aligncenter" width="128" />](./images/manoj.png)
+
+
+###
 
 ### Ritesh Kuchukulla
 
@@ -296,14 +313,23 @@ realize their goals using AWS services.
 
 [<img src="./images/nb-logo-grey.png" alt="NB Logo" class="size-full wp-image-6192 aligncenter" width="300" />](./images/nb-logo-grey.png)
 
+
+###
+
 ### Resources
 
 <a href="https://northbaysolutions.com/resources/" class="lb-txt-none lb-txt">NBS Resources</a>
 
 ------------------------------------------------------------------------
 
+
+###
+
 ### Follow
 
 <a href="https://twitter.com/northbays" class="lb-txt-none lb-txt"><em></em> NBS Twitter</a>
 
 **
+
+
+###
