@@ -27,7 +27,7 @@ web_deploy: html
 	export AWS_PROFILE=571792806194_AdministratorAccess
 	aws s3 cp nb.gstn.kafka.elas.html s3://northblog/
 	aws s3 cp style.css s3://northblog/
-	aws s3 cp images/ s3://northblog/images/ --recursive
+	aws s3 sync images/ s3://northblog/images/  --delete
 	
 ### main functions ###
 zip:

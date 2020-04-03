@@ -4,7 +4,7 @@ Cloudformation templates and scripts for a reference implementation of AWS Groun
 [Northbay Blog](https://northbaysolutions.com/)
 ------------------------------------------------------------------------------------------
 
-Bringing Space to the Cloud: A how to guide
+Bringing Space to the Cloud: Step by Step guide.
 ==========================================================
 
 
@@ -273,9 +273,26 @@ Nasa splits their outputs into Level products. Level 0 products are closer to ra
 
 The AQUA satellite can be tracked live on the following site:
 
-[<img src="./images/aqua_live.png" alt="Actual Downlinked Photo" class="size-full wp-image-6192 aligncenter" width="512" />](./images/aqua_live.png)
+[<img src="./images/aqua_live.png" alt="AQUA tracking" class="size-full wp-image-6192 aligncenter" width="512" />](./images/aqua_live.png)
+
+DataDefender 
 
 
+The data stream can be monitored live on the DataDefender webgui. DataDefender is required to be running on the receiver instance communicating with the Ground Station antenna. 
+
+[<img src="./images/contact.end.png" alt="DDX contact" class="size-full wp-image-6192 aligncenter" width="512" />](./images/contact.end.png)
+
+The Data Rate
+
+[<img src="./images/data.rate.png" alt="Data Rate" class="size-full wp-image-6192 aligncenter" width="512" />](./images/data.rate.png)
+
+
+Kibana UI over Elastic Search
+
+
+Here is an example of the Kibana UI showing received files with locations and decoded text messages indexed and searchable.
+
+[<img src="./images/kibana.png" alt="Data Rate" class="size-full wp-image-6192 aligncenter" width="512" />](./images/kibana.png)
 
 
 ###
@@ -319,6 +336,14 @@ realize their goals using AWS services.
 ### Resources
 
 <a href="https://northbaysolutions.com/resources/" class="lb-txt-none lb-txt">NBS Resources</a>
+
+<a href="https://aws.amazon.com/blogs/publicsector/earth-observation-using-aws-ground-station/">AWS Blog</a>
+
+<a href="https://aws.amazon.com/quickstart/architecture/confluent-platform/" class="lb-txt-none lb-txt">Confluent Kafka Quickstart</a>
+
+<a href="https://aws.amazon.com/quickstart/architecture/vpc/" class="lb-txt-none lb-txt">VPC Quickstart</a>
+
+<a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CWL_ES_Stream.html" class="lb-txt-none lb-txt">Elastic Search Cloudwatch Streaming</a>
 
 ------------------------------------------------------------------------
 
