@@ -344,6 +344,10 @@ Here is an example of the Kibana UI showing received files with locations and de
 
 ###
 
+[<img src="./images/nb-logo-grey.png" alt="NB Logo" class="size-full wp-image-6192 aligncenter" width="300" />](./images/nb-logo-grey.png)
+
+
+
 ### Sam Zahabi
 
 Sam is a Solutions Architect with NorthBay Solutions (NBS)
@@ -375,7 +379,6 @@ realize their goals using AWS services.
 [<img src="./images/ritesh.png" alt="Ritesh" class="size-full wp-image-6192 aligncenter" width="128" />](./images/ritesh.png)
 
 
-[<img src="./images/nb-logo-grey.png" alt="NB Logo" class="size-full wp-image-6192 aligncenter" width="300" />](./images/nb-logo-grey.png)
 
 
 ###
