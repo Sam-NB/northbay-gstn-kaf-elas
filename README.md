@@ -4,7 +4,7 @@ Cloudformation templates and scripts for a reference implementation of AWS Groun
 [Northbay Blog](https://northbaysolutions.com/)
 ------------------------------------------------------------------------------------------
 
-Bringing Space to the Cloud: Step by Step guide.
+Bringing Space to the Cloud: A Step By Step Guide.
 ==========================================================
 
 
