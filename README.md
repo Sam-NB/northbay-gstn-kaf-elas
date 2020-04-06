@@ -206,7 +206,6 @@ Steps:
 
 On our reference non groundstation SDR demodulator implementation, we have preconfigured multimon-ng a RTL-SDR compatible digital mode decoder that works on multiple protocols. For this example we are going to simulate receiving a tcp stream of Morse code in Continuous Wave. You can point your sdr to that port or use the sample file from wikipedia as below. The producer node will decode messages on received on tcp port 7355 and pipe those to our Kafka topic for ingestion and streaming to Elastic Search. 
 
-Bash
     
     #download a sample Morse CW radio transmission
     wget https://upload.wikimedia.org/wikipedia/commons/0/04/Wikipedia-Morse.ogg
@@ -340,8 +339,10 @@ The sample folder structure would look like:
 
 
 
-The sample successful capture log: 
 
+<details>
+  <summary>A sample successful capture log</summary>
+  
 
     20200330-15:41:54 Satellite: AQUA
     20200330-15:41:54 S3 bucket: your_bucket
@@ -887,9 +888,10 @@ The sample successful capture log:
     upload: ../data/P1540064AAAAAAAAAAAAAA20090170507001.PDS to s3://your_bucket/data/AQUA/level0/P1540064AAAAAAAAAAAAAA20090170507001.PDS
     Uploading /opt/aws/groundstation/bin/data-capture_20200330-1541.log to s3://your_bucket/data/AQUA/logs/20200330-1541-AQUA-data-capture.log
 
+</details>
 
-The sample successful post processing log: 
-
+<details>
+  <summary>A sample successful post processing log</summary>
 
 
     NUM_L0_FILES_BEFORE_INGEST: 0
@@ -1079,6 +1081,8 @@ The sample successful post processing log:
     New GBAD Files : 4
     Uploading /opt/aws/groundstation/bin/ipopp-ingest.log to s3://your_bucket/data/AQUA/logs/20200330-1710-AQUA-ipopp-ingest.log
 
+</details>
+
 
 ###
 
@@ -1176,7 +1180,10 @@ Here we have configured a basic high-availability setup using 2 zones us-east-2a
 
   Apache Kafka
 
-We used a 3 stack approach. We have a broker cluster that hosts the Kafka broker topics and Zookeeper nodes, a consumer cluster
+We used a 3 stack approach. 
+A Broker stack defining a cluster that hosts the Kafka broker topics and Zookeeper nodes.
+A ConsumerWorker stack that defines the cluster of listeners on the topic that emit to cloudwatch.
+A ProducerWorker stack that defines a cluster of listeners for manual mode transmissions on tcp port 7355 and emits the demodulated and decoded messages to the Kafka groundstation topic.  
 
 Communication is managed over the groundstation topic. 
 
@@ -1188,8 +1195,6 @@ Producer nodes listen for messages on incoming tcp port 7355, decode and send th
   Cloudwatch Streaming to ElasticSearch and Kibana
 
 In basic terms a cloudwatch agent was installed via userdata on the consumer-worker nodes to stream to a cloudformation configured loggroup and a Lambda function streams groups of messages to the ElasticSearch cluster. Reference can be found <a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CWL_ES_Stream.html">here.</a>
-
-
 
 
 ###
