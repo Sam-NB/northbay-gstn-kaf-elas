@@ -1212,7 +1212,14 @@ This template will incur costs but it its minimal configuration and assuming you
 
 Nasa splits their outputs into Level products. Level 0 products are closer to raw unprocessed data. As you rise to Levels 1 and 2 you start to see more human readable image and text output for example:
 
-[<img src="./images/MYDcrefl_TrueColor.20090165802.png" alt="Actual Downlinked Photo" class="size-full wp-image-6192 aligncenter" width="512" />](./images/MYDcrefl_TrueColor.20090165802.png)
+
+Here we see a couple of imags of AQUA's 4 minute fly over in range of the Ohio us-east-2 groundstation and pointing it's sensors towards the Atlantic Ocean. We can see the landmass around Nova Scotia as well as the cloudcover for that day. 
+
+
+[<img src="./images/MYD14.20090165802.png" alt="Actual Downlinked Landmass Photo" class="size-full wp-image-6192 aligncenter" width="512" />](./images/MYD14.20090165802.png)
+
+
+[<img src="./images/MYDcrefl_TrueColor.20090165802.png" alt="Actual Downlinked Cloudcover Photo" class="size-full wp-image-6192 aligncenter" width="512" />](./images/MYDcrefl_TrueColor.20090165802.png)
 
 
 The AQUA satellite can be tracked live on the following site:
