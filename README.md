@@ -111,91 +111,92 @@ Steps:
 
 2. Create a bucket in us-east-2 to store and run the required templates and software. 
 
-    your_bucket=my_bucket
-    aws s3 mb s3://$your_bucket --region us-east-2
-    git clone https://github.com/Sam-NB/northbay-gstn-kaf-elas
-    cd northbay-gstn-kaf-elas 
-    aws s3 sync . s3://$your_bucket --exclude ".git*"
+
+        your_bucket=my_bucket
+        aws s3 mb s3://$your_bucket --region us-east-2
+        git clone https://github.com/Sam-NB/northbay-gstn-kaf-elas
+        cd northbay-gstn-kaf-elas 
+        aws s3 sync . s3://$your_bucket --exclude ".git*"
 
 
 3. Fire off the all inclusive cloudformation deploy. (us-east-2). (Costs will be incurred on your account but spot instances will be used by default for the Kafka nodes. Additionally, in order to save receiver andn processor costs while waiting for your scheduled satellite contact you can safely stop the receiver and processor instances and simply start them up 15 minutes before your receive window. After processing they can be safely stopped until you need them again next time. 
 )
 
-    # setup some required vars
-    Env=demo
-    region=us-east-2
-    my_ip=$(curl "http://myexternalip.com/raw")
-    url=$(aws s3 presign s3://$your_bucket/src/templates/northbay-kafka-groundstation-elasticsearch-master.template.yaml)
-    
-    # create the aws resources via cf stack
-    aws cloudformation create-stack --stack-name NB-Gstn-Kaf-Elas \
-    --template-url $url \
-    --region $region \
-    --capabilities CAPABILITY_NAMED_IAM CAPABILITY_IAM \
-    --parameters \
-    ParameterKey=AquaGroundStationCFTemplateVersion,ParameterValue=1 \
-    ParameterKey=AquaGroundStationCreateReceiverInstance,ParameterValue=true \
-    ParameterKey=AssignPublicIP,ParameterValue=true \
-    ParameterKey=AvailabilityZones,ParameterValue="${region}a\,${region}b" \
-    ParameterKey=BootDiskSize,ParameterValue=24 \
-    ParameterKey=BrokerNodeInstanceType,ParameterValue=m4.large \
-    ParameterKey=BrokerNodeSpotPrice,ParameterValue=0.05 \
-    ParameterKey=BrokerNodeStorage,ParameterValue=40 \
-    ParameterKey=BrokerNodeStorageType,ParameterValue=gp2 \
-    ParameterKey=ClusterName,ParameterValue=kafka \
-    ParameterKey=ConfluentEdition,ParameterValue="Confluent Open Source" \
-    ParameterKey=ConfluentVersion,ParameterValue=5.0.0 \
-    ParameterKey=ConnectorURLs,ParameterValue=- \
-    ParameterKey=EBSIOPS,ParameterValue=0 \
-    ParameterKey=EBSVolumeSize,ParameterValue=10 \
-    ParameterKey=EBSVolumeType,ParameterValue=gp2 \
-    ParameterKey=ElasticSearchInstanceCount,ParameterValue=1 \
-    ParameterKey=ElasticSearchInstanceType,ParameterValue=t2.small.elasticsearch \
-    ParameterKey=ElasticsearchVersion,ParameterValue=7.4 \
-    ParameterKey=Env,ParameterValue=$Env \
-    ParameterKey=GroundStationInstanceType,ParameterValue=m5.4xlarge \
-    ParameterKey=GroundStationSatelliteName,ParameterValue=AQUA \
-    ParameterKey=GroundstationMessageLogGroupName,ParameterValue=/$Env/groundstation/messages \
-    ParameterKey=IpoppPassword,ParameterValue=ComplexPassword123 \
-    ParameterKey=KafkaTopic,ParameterValue=groundstation \
-    ParameterKey=KafkaTopicPartitions,ParameterValue=1 \
-    ParameterKey=KafkaTopicReplicationFactor,ParameterValue=0 \
-    ParameterKey=KeyPairName,ParameterValue=my_key \
-    ParameterKey=LinuxOSAMI,ParameterValue=Amazon-Linux-HVM \
-    ParameterKey=LogGroupName,ParameterValue=/dev/groundstation/messages \
-    ParameterKey=NumBrokers,ParameterValue=1 \
-    ParameterKey=NumConsumerWorkers,ParameterValue=1 \
-    ParameterKey=NumProducerWorkers,ParameterValue=1 \
-    ParameterKey=NumZookeepers,ParameterValue=0 \
-    ParameterKey=PrivateSubnet1CIDR,ParameterValue=10.0.0.0/19 \
-    ParameterKey=PrivateSubnet2CIDR,ParameterValue=10.0.32.0/19 \
-    ParameterKey=PublicSubnet1CIDR,ParameterValue=10.0.128.0/20 \
-    ParameterKey=PublicSubnet2CIDR,ParameterValue=10.0.144.0/20 \
-    ParameterKey=QSS3BucketName,ParameterValue=$your_bucket \
-    ParameterKey=QSS3KeyPrefix,ParameterValue=src/ \
-    ParameterKey=RemoteAccessCIDR,ParameterValue=$my_ip/32 \
-    ParameterKey=SSHAccessCIDR,ParameterValue=$my_ip/32 \
-    ParameterKey=VPCCIDR,ParameterValue=10.0.0.0/16 \
-    ParameterKey=WorkerNodeInstanceType,ParameterValue=m4.xlarge \
-    ParameterKey=WorkerNodeSpotPrice,ParameterValue=0.10 \
-    ParameterKey=WorkerNodeStorage,ParameterValue=0 \
-    ParameterKey=ZookeeperNodeInstanceType,ParameterValue=m4.large \
-    ParameterKey=ZookeeperNodeSpotPrice,ParameterValue=0.05 \
-    ParameterKey=ZookeeperNodeStorage,ParameterValue=0
+        # setup some required vars
+        Env=demo
+        region=us-east-2
+        my_ip=$(curl "http://myexternalip.com/raw")
+        url=$(aws s3 presign s3://$your_bucket/src/templates/northbay-kafka-groundstation-elasticsearch-master.template.yaml)
+        
+        # create the aws resources via cf stack
+        aws cloudformation create-stack --stack-name NB-Gstn-Kaf-Elas \
+        --template-url $url \
+        --region $region \
+        --capabilities CAPABILITY_NAMED_IAM CAPABILITY_IAM \
+        --parameters \
+        ParameterKey=AquaGroundStationCFTemplateVersion,ParameterValue=1 \
+        ParameterKey=AquaGroundStationCreateReceiverInstance,ParameterValue=true \
+        ParameterKey=AssignPublicIP,ParameterValue=true \
+        ParameterKey=AvailabilityZones,ParameterValue="${region}a\,${region}b" \
+        ParameterKey=BootDiskSize,ParameterValue=24 \
+        ParameterKey=BrokerNodeInstanceType,ParameterValue=m4.large \
+        ParameterKey=BrokerNodeSpotPrice,ParameterValue=0.05 \
+        ParameterKey=BrokerNodeStorage,ParameterValue=40 \
+        ParameterKey=BrokerNodeStorageType,ParameterValue=gp2 \
+        ParameterKey=ClusterName,ParameterValue=kafka \
+        ParameterKey=ConfluentEdition,ParameterValue="Confluent Open Source" \
+        ParameterKey=ConfluentVersion,ParameterValue=5.0.0 \
+        ParameterKey=ConnectorURLs,ParameterValue=- \
+        ParameterKey=EBSIOPS,ParameterValue=0 \
+        ParameterKey=EBSVolumeSize,ParameterValue=10 \
+        ParameterKey=EBSVolumeType,ParameterValue=gp2 \
+        ParameterKey=ElasticSearchInstanceCount,ParameterValue=1 \
+        ParameterKey=ElasticSearchInstanceType,ParameterValue=t2.small.elasticsearch \
+        ParameterKey=ElasticsearchVersion,ParameterValue=7.4 \
+        ParameterKey=Env,ParameterValue=$Env \
+        ParameterKey=GroundStationInstanceType,ParameterValue=m5.4xlarge \
+        ParameterKey=GroundStationSatelliteName,ParameterValue=AQUA \
+        ParameterKey=GroundstationMessageLogGroupName,ParameterValue=/$Env/groundstation/messages \
+        ParameterKey=IpoppPassword,ParameterValue=ComplexPassword123 \
+        ParameterKey=KafkaTopic,ParameterValue=groundstation \
+        ParameterKey=KafkaTopicPartitions,ParameterValue=1 \
+        ParameterKey=KafkaTopicReplicationFactor,ParameterValue=0 \
+        ParameterKey=KeyPairName,ParameterValue=my_key \
+        ParameterKey=LinuxOSAMI,ParameterValue=Amazon-Linux-HVM \
+        ParameterKey=LogGroupName,ParameterValue=/dev/groundstation/messages \
+        ParameterKey=NumBrokers,ParameterValue=1 \
+        ParameterKey=NumConsumerWorkers,ParameterValue=1 \
+        ParameterKey=NumProducerWorkers,ParameterValue=1 \
+        ParameterKey=NumZookeepers,ParameterValue=0 \
+        ParameterKey=PrivateSubnet1CIDR,ParameterValue=10.0.0.0/19 \
+        ParameterKey=PrivateSubnet2CIDR,ParameterValue=10.0.32.0/19 \
+        ParameterKey=PublicSubnet1CIDR,ParameterValue=10.0.128.0/20 \
+        ParameterKey=PublicSubnet2CIDR,ParameterValue=10.0.144.0/20 \
+        ParameterKey=QSS3BucketName,ParameterValue=$your_bucket \
+        ParameterKey=QSS3KeyPrefix,ParameterValue=src/ \
+        ParameterKey=RemoteAccessCIDR,ParameterValue=$my_ip/32 \
+        ParameterKey=SSHAccessCIDR,ParameterValue=$my_ip/32 \
+        ParameterKey=VPCCIDR,ParameterValue=10.0.0.0/16 \
+        ParameterKey=WorkerNodeInstanceType,ParameterValue=m4.xlarge \
+        ParameterKey=WorkerNodeSpotPrice,ParameterValue=0.10 \
+        ParameterKey=WorkerNodeStorage,ParameterValue=0 \
+        ParameterKey=ZookeeperNodeInstanceType,ParameterValue=m4.large \
+        ParameterKey=ZookeeperNodeSpotPrice,ParameterValue=0.05 \
+        ParameterKey=ZookeeperNodeStorage,ParameterValue=0
 
 
 
 4. Wait for the EC2 instance bootstrap userdata scripts to execute, approx (5 minutes)
 5. Add Bucket Notifications to push processed Gstation files to the created kafka topic.
 
-    #some required vars
-    your_account=$(aws sts get-caller-identity --output text --query 'Account')
-    lambda=$(echo S3ToKafkaTopic_$Env)
+        #some required vars
+        your_account=$(aws sts get-caller-identity --output text --query 'Account')
+        lambda=$(echo S3ToKafkaTopic_$Env)
 
-    #add permissions and notifications on both the bucket and lambda function
-    sed  "s/LAMBDA_FUNCTION/$lambda/g; s/REGION/$region/g; s/ACCOUNT_ID/$your_account/g" src/templates/event_sub.json  > sub.json
-    aws lambda add-permission --function-name $lambda --statement-id lambda_invoker --action "lambda:InvokeFunction" --principal s3.amazonaws.com --source-arn "arn:aws:s3:::$your_bucket" --source-account $your_account --region $region
-    aws s3api put-bucket-notification-configuration --bucket $your_bucket --notification-configuration file://sub.json
+        #add permissions and notifications on both the bucket and lambda function
+        sed  "s/LAMBDA_FUNCTION/$lambda/g; s/REGION/$region/g; s/ACCOUNT_ID/$your_account/g" src/templates/event_sub.json  > sub.json
+        aws lambda add-permission --function-name $lambda --statement-id lambda_invoker --action "lambda:InvokeFunction" --principal s3.amazonaws.com --source-arn "arn:aws:s3:::$your_bucket" --source-account $your_account --region $region
+        aws s3api put-bucket-notification-configuration --bucket $your_bucket --notification-configuration file://sub.json
 
 6. Send sample radio data to the open port on one of the the kafka producer nodes or Schedule a contact in the Groundstation UI.  
 
@@ -207,22 +208,22 @@ Steps:
 On our reference non groundstation SDR demodulator implementation, we have preconfigured multimon-ng a RTL-SDR compatible digital mode decoder that works on multiple protocols. For this example we are going to simulate receiving a tcp stream of Morse code in Continuous Wave. You can point your sdr to that port or use the sample file from wikipedia as below. The producer node will decode messages on received on tcp port 7355 and pipe those to our Kafka topic for ingestion and streaming to Elastic Search. 
 
     
-    #download a sample Morse CW radio transmission
-    wget https://upload.wikimedia.org/wikipedia/commons/0/04/Wikipedia-Morse.ogg
-    ffmpeg -i Wikipedia-Morse.ogg -f s16le -acodec pcm_s16le Wikipedia-Morse.raw
-    
-    # what the raw file sounds like
-    cat Wikipedia-Morse.raw | aplay -r 48k -f S16_LE -t raw -c 1
+        #download a sample Morse CW radio transmission
+        wget https://upload.wikimedia.org/wikipedia/commons/0/04/Wikipedia-Morse.ogg
+        ffmpeg -i Wikipedia-Morse.ogg -f s16le -acodec pcm_s16le Wikipedia-Morse.raw
+        
+        # what the raw file sounds like
+        cat Wikipedia-Morse.raw | aplay -r 48k -f S16_LE -t raw -c 1
 
-    # this is the decoding that happens on the producer node
-    cat Wikipedia-Morse.raw | multimon-ng -a MORSE_CW -t raw -
+        # this is the decoding that happens on the producer node
+        cat Wikipedia-Morse.raw | multimon-ng -a MORSE_CW -t raw -
 
-    #test connectivity and simulate a transmission
-    producer=$(aws ec2 describe-instances --region us-east-2 --output text |dos2unix| sed ':a;N;$!ba;s/\n/ /g' | sed "s/\(RESERVATIONS\)/\n\1/g" | grep kafka-producer | awk '{print $43}' | tail -n 1)
-    nc -vz $producer 7355
-    
-    # transmit your tcp message to the producer node. 
-    cat Wikipedia-Morse.raw | nc $producer 7355
+        #test connectivity and simulate a transmission
+        producer=$(aws ec2 describe-instances --region us-east-2 --output text |dos2unix| sed ':a;N;$!ba;s/\n/ /g' | sed "s/\(RESERVATIONS\)/\n\1/g" | grep kafka-producer | awk '{print $43}' | tail -n 1)
+        nc -vz $producer 7355
+        
+        # transmit your tcp message to the producer node. 
+        cat Wikipedia-Morse.raw | nc $producer 7355
 
 
 ###
