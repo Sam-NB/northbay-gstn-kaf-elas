@@ -107,7 +107,7 @@ Steps:
 
 1. Generate a us-east-2 keypair if you don't have one already. 
 
-    aws ec2 create-key-pair --key-name my_key --region us-east-2 | jq -r .KeyMaterial > my_key.pem
+        aws ec2 create-key-pair --key-name my_key --region us-east-2 | jq -r .KeyMaterial > my_key.pem
 
 2. Create a bucket in us-east-2 to store and run the required templates and software. 
 
