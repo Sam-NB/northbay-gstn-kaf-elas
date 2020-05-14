@@ -100,7 +100,7 @@ You can configure a CloudWatch Logs log group to stream data it receives to your
 
 ### TLDR Step by Step 
 
-This demo allows you to stream, demodulate and decode a few sample radio transmissions as input and record them in an ElasticSearch Cluster. If you want to use real satellite transmissions piece, you will need to first onboard your AWS in Ground Station and apply for downlink only (read only) access to Norad id 27424, [Aqua](https://en.wikipedia.org/wiki/Aqua_(satellite)) precipitation, evaporation and water cycling data gathering satellite. 
+This demo allows you to stream, demodulate and decode a few sample radio transmissions as input and record them in an ElasticSearch Cluster. If you want to use the real satellite transmissions piece, you will need to first onboard your AWS in Ground Station and apply for downlink only (read only) access to Norad id 27424, [Aqua](https://en.wikipedia.org/wiki/Aqua_(satellite)) precipitation, evaporation and water cycling data gathering satellite. 
 
 
 Steps:
@@ -119,7 +119,7 @@ Steps:
         aws s3 sync . s3://$your_bucket --exclude ".git*"
 
 
-3. Fire off the all inclusive cloudformation deploy. (us-east-2). (Costs will be incurred on your account but spot instances will be used by default for the Kafka nodes. Additionally, in order to save receiver andn processor costs while waiting for your scheduled satellite contact you can safely stop the receiver and processor instances and simply start them up 15 minutes before your receive window. After processing they can be safely stopped until you need them again next time. 
+3. Fire off the all inclusive cloudformation deploy. (us-east-2). (Costs will be incurred on your account but spot instances will be used by default for the Kafka nodes. Additionally, in order to save receiver and processor costs while waiting for your scheduled satellite contact you can safely stop the receiver and processor instances and simply start them up 15 minutes before your receive window. After processing they can be safely stopped until you need them again next time. 
 )
 
         # setup some required vars
