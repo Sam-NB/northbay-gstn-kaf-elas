@@ -205,7 +205,7 @@ Steps:
 
 7. Manual mode
 
-On our reference non groundstation SDR demodulator implementation, we have preconfigured multimon-ng a RTL-SDR compatible digital mode decoder that works on multiple protocols. For this example we are going to simulate receiving a tcp stream of Morse code in Continuous Wave. You can point your sdr to that port or use the sample file from wikipedia as below. The producer node will decode messages on received on tcp port 7355 and pipe those to our Kafka topic for ingestion and streaming to Elastic Search. 
+On our reference non groundstation SDR demodulator implementation, we have preconfigured multimon-ng, an RTL-SDR compatible digital mode decoder that works on multiple protocols. For this example we are going to simulate receiving a tcp stream of Morse code in Continuous Wave. You can point your sdr to that port or use the sample file from wikipedia as below. The producer node will decode messages received on tcp port 7355 and pipe those to our Kafka topic for ingestion and streaming to Elastic Search. 
 
     
         #download a sample Morse CW radio transmission
@@ -230,7 +230,7 @@ On our reference non groundstation SDR demodulator implementation, we have preco
 
 7. Ground Station mode
 
-Once you have onboarded your account you can schedule a contact and if you leave the receiver and processor instances up during your receiver window the output raw and processed data will be uploaded to the s3 bucket you configured in step 2. The notfications you configured in step 5 will then stream the file info into Kafka and ElasticSearch. 
+Once you have onboarded your account you can schedule a contact, and if you leave the receiver and processor instances up during your receiver window, the output raw and processed data will be uploaded to the s3 bucket you configured in step 2. The notfications you configured in step 5 will then stream the file info into Kafka and ElasticSearch. 
 
 The sample folder structure would look like:
 
@@ -1090,7 +1090,7 @@ The sample folder structure would look like:
 ### Details of what happening in each piece
 
 
-   The majority of the Kafka Stack configuration is done via the nodegroup.template.yaml userdata with custom bootstrap operations based node type BROKER, CONSUMER or PRODUCER.
+   The majority of the Kafka Stack configuration is done via the nodegroup.template.yaml userdata, with custom bootstrap operations based on node type: BROKER, CONSUMER or PRODUCER.
 
     ZOOKER_PORT="2181"
     KAFKA_BROKER_PORT="9092"
@@ -1171,12 +1171,12 @@ The sample folder structure would look like:
 
   AWS Ground Station
 
-For this piece we followed the extensive guide provide by aws and merged it into our cloudformation template with all scripts and required software included for ease of one-click deploy. <a href="https://aws.amazon.com/blogs/publicsector/earth-observation-using-aws-ground-station/">AWS Ground Station Blog</a>
+For this piece, we followed the extensive guide provided by aws and merged it into our cloudformation template, with all scripts and required software included, for easy one-click/one-command-line deploy. <a href="https://aws.amazon.com/blogs/publicsector/earth-observation-using-aws-ground-station/">AWS Ground Station Blog</a>
 
 
   AWS VPC quickstart
 
-Here we have configured a basic high-availability setup using 2 zones us-east-2a and us-east2-b that the cluster instances would scale into if you raised the number of required nodes. In this demo we only used 1 node in each availability group but this can be scaled up. 
+Here we have configured a basic high-availability setup using 2 zones, us-east-2a and us-east2-b that the cluster instances would scale into, if you raised the number of required nodes. In this demo, we only used 1 node in each availability group, but this can be scaled up by changing those params. 
 
 
   Apache Kafka
@@ -1195,14 +1195,14 @@ Producer nodes listen for messages on incoming tcp port 7355, decode and send th
 
   Cloudwatch Streaming to ElasticSearch and Kibana
 
-In basic terms a cloudwatch agent was installed via userdata on the consumer-worker nodes to stream to a cloudformation configured loggroup and a Lambda function streams groups of messages to the ElasticSearch cluster. Reference can be found <a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CWL_ES_Stream.html">here.</a>
+In basic terms, a cloudwatch agent was installed via userdata on the consumer-worker nodes to stream to a cloudformation configured loggroup. A Lambda function then streams groups of messages to the ElasticSearch cluster. Reference can be found <a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CWL_ES_Stream.html">here.</a>
 
 
 ###
 
 ### Cost
 
-This template will incur costs but it its minimal configuration and assuming you stop the receiver and processer m5.4xlarge intances ($0.768 per Hour each) and only run them in 15 minute increments the minimal cluster size would be composed of 3 instances with the following spot prices $0.20 per hour for Kafka worker nodes, $0.10 per hour for the Broker node. Minimal Elastic Search cluster costs as well which at the time of this writing t2.micro.elasticsearch $0.018 per Hour. 
+This template will incur costs but they are minimal in the default configuration. This assumes you start and stop the receiver and processor m5.4xlarge intances ($0.768 per Hour each) before and after each pass, only running them in 15 minute increments for each satellite pass. The minimal Kafka cluster size in the default params would be composed of 3 instances with the following spot prices; $0.20 per hour for each Kafka worker node, $0.10 per hour for the Broker node. Minimal Elastic Search cluster costs are also incurred, which are, at the time of this writing, $0.018 per Hour for a t2.micro.elasticsearch instance. 
 
 [<img src="./images/price1.png" alt="minimal spot instances" class="size-full wp-image-6192 aligncenter" width="512" />](./images/price1.png)
 
@@ -1214,7 +1214,7 @@ This template will incur costs but it its minimal configuration and assuming you
 Nasa splits their outputs into Level products. Level 0 products are closer to raw unprocessed data. As you rise to Levels 1 and 2 you start to see more human readable image and text output for example:
 
 
-Here we see a couple of imags of AQUA's 4 minute fly over in range of the Ohio us-east-2 groundstation and pointing it's sensors towards the Atlantic Ocean. We can see the landmass around Nova Scotia as well as the cloudcover for that day. 
+Here we see a couple of images from AQUA's 4 minute fly over in range of the Ohio us-east-2 groundstation and pointing it's sensors towards the Atlantic Ocean. We can see the landmass around Nova Scotia as well as the cloudcover for that day. 
 
 
 [<img src="./images/MYD14.20090165802.png" alt="Actual Downlinked Landmass Photo" class="size-full wp-image-6192 aligncenter" width="512" />](./images/MYD14.20090165802.png)
@@ -1229,8 +1229,7 @@ The AQUA satellite can be tracked live on the following site:
 
 DataDefender 
 
-
-The data stream can be monitored live on the DataDefender webgui. DataDefender is required to be running on the receiver instance communicating with the Ground Station antenna. 
+The data stream can be monitored live on the DataDefender webgui. DataDefender is required to be running on the receiver instance communicating with the Ground Station antenna in order for the stream to be authorized by Ground Station. 
 
 [<img src="./images/contact.end.png" alt="DDX contact" class="size-full wp-image-6192 aligncenter" width="512" />](./images/contact.end.png)
 
